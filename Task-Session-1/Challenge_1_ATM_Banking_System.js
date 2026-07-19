@@ -78,4 +78,4 @@ console.log( ATM("1234", "withdraw", 100) );
 
 console.log( ATM("1234", "change_pin", null, "5678") ); 
 
-console.log( ATM("1234", "check_balance") ); 
+console.log( ATM("1234", "check_balance") );

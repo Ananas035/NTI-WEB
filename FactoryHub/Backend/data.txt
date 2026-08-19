@@ -1,0 +1,11 @@
+PORT = 5000
+
+MONGODB_URI= mongodb://youanasibrahim05_db_user:UM9iwyYzPqfOS1Ra@ac-jptugif-shard-00-00.sijyjpv.mongodb.net:27017,ac-jptugif-shard-00-01.sijyjpv.mongodb.net:27017,ac-jptugif-shard-00-02.sijyjpv.mongodb.net:27017/?ssl=true&replicaSet=atlas-y1ccma-shard-0&authSource=admin&appName=Cluster0
+
+DB_NAME = youanasibrahim05_db_user
+
+
+
+
+# mongodb+srv://youanasibrahim05_db_user:UM9iwyYzPqfOS1Ra@cluster0.sijyjpv.mongodb.net/?appName=Cluster0
+# pass:f8kX9TiyOdFt4DA6

@@ -1,23 +1,41 @@
 const Product = require('../models/Product');
+const InventoryTransaction = require('../models/InventoryTransaction');
 
 
 exports.createProduct = async (req, res) => {
     try {
         const productData = { ...req.body };
 
+        // Convert colors string to array
         if (typeof productData.colors === 'string') {
-    productData.colors = productData.colors
-        .split(',')
-        .map(color => color.trim())
-        .filter(Boolean);
-    }
+            productData.colors = productData.colors
+                .split(',')
+                .map(color => color.trim())
+                .filter(Boolean);
+        }
 
-
+        // If an image was uploaded
         if (req.file) {
             productData.image = `/uploads/models/${req.file.filename}`;
         }
 
+        // Initial stock
+        const initialQuantity = Number(productData.availablePieces) || 0;
+
+        // Create product
         const product = await Product.create(productData);
+
+        // Create first inventory transaction automatically
+        if (initialQuantity > 0) {
+            await InventoryTransaction.create({
+                product: product._id,
+                transactionType: 'ADD',
+                quantity: initialQuantity,
+                previousInventory: 0,
+                currentInventory: initialQuantity,
+                referenceNumber: null
+            });
+        }
 
         res.status(201).json({
             success: true,
@@ -25,6 +43,7 @@ exports.createProduct = async (req, res) => {
         });
 
     } catch (error) {
+
         if (error.code === 11000) {
             return res.status(400).json({
                 success: false,

@@ -1,7 +1,6 @@
 const Product = require('../models/Product');
 
-// @desc    Create a new product with an image
-// @route   POST /api/products
+
 exports.createProduct = async (req, res) => {
     try {
         const productData = { ...req.body };
@@ -13,7 +12,7 @@ exports.createProduct = async (req, res) => {
         .filter(Boolean);
     }
 
-        // If an image was uploaded, save its path in the database
+
         if (req.file) {
             productData.image = `/uploads/models/${req.file.filename}`;
         }
@@ -41,8 +40,7 @@ exports.createProduct = async (req, res) => {
 };
 
 
-// @desc    Get all products
-// @route   GET /api/products
+
 exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find();
@@ -62,8 +60,6 @@ exports.getProducts = async (req, res) => {
 };
 
 
-// @desc    Get product by model code
-// @route   GET /api/products/code/:modelCode
 exports.getProductByCode = async (req, res) => {
     try {
         const product = await Product.findOne({
@@ -92,16 +88,15 @@ exports.getProductByCode = async (req, res) => {
 
 
 
-// @desc    Update product by model code
-// @route   PATCH /api/products/code/:modelCode
+
 exports.updateProduct = async (req, res) => {
     try {
         const productData = { ...req.body };
 
-        // Prevent changing modelCode during normal update
+
         delete productData.modelCode;
 
-        // Convert colors string to array
+
         if (typeof productData.colors === 'string') {
             productData.colors = productData.colors
                 .split(',')
@@ -109,7 +104,7 @@ exports.updateProduct = async (req, res) => {
                 .filter(Boolean);
         }
 
-        // Update image only if a new image was uploaded
+
         if (req.file) {
             productData.image = `/uploads/models/${req.file.filename}`;
         }
@@ -146,8 +141,7 @@ exports.updateProduct = async (req, res) => {
 };
 
 
-// @desc    Delete product by model code
-// @route   DELETE /api/products/code/:modelCode
+
 exports.deleteProduct = async (req, res) => {
     try {
         const product = await Product.findOneAndDelete({

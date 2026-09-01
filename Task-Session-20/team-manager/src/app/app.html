@@ -1,0 +1,488 @@
+<div class="app-container">
+
+  <!-- Header -->
+  <header class="header">
+    <div>
+      <h1>Team Manager</h1>
+      <p>Manage your team members easily</p>
+    </div>
+
+    <div class="team-count">
+      <span>{{ teamMembers.length }}</span>
+      <small>Members</small>
+    </div>
+  </header>
+
+
+  <!-- Add Member Section -->
+  <section class="form-section">
+
+    <div class="section-title">
+      <h2>Add New Member</h2>
+      <p>Add a new member to your team</p>
+    </div>
+
+    <form (submit)="$event.preventDefault(); addMember()">
+
+      <div class="form-grid">
+
+        <!-- Name -->
+        <div class="form-group">
+          <label for="name">Member Name</label>
+
+          <input
+            id="name"
+            type="text"
+            name="name"
+            placeholder="Enter member name"
+            [(ngModel)]="newMember.name"
+          />
+
+          @if (!newMember.name.trim()) {
+            <small class="validation-hint">
+              Name is required
+            </small>
+          }
+        </div>
+
+
+        <!-- Age -->
+        <div class="form-group">
+          <label for="age">Age</label>
+
+          <input
+            id="age"
+            type="number"
+            name="age"
+            min="1"
+            placeholder="Enter age"
+            [(ngModel)]="newMember.age"
+          />
+
+          @if (
+            newMember.age !== null &&
+            newMember.age <= 0
+          ) {
+            <small class="validation-error">
+              Age must be greater than 0
+            </small>
+          }
+        </div>
+
+
+        <!-- Department -->
+        <div class="form-group">
+          <label for="department">Department</label>
+
+          <select
+            id="department"
+            name="department"
+            [(ngModel)]="newMember.department"
+          >
+
+            <option value="">
+              Select Department
+            </option>
+
+            @for (department of departments; track department) {
+              <option [value]="department">
+                {{ department }}
+              </option>
+            }
+
+          </select>
+
+          @if (!newMember.department) {
+            <small class="validation-hint">
+              Department is required
+            </small>
+          }
+        </div>
+
+
+        <!-- Availability -->
+        <div class="form-group availability-input">
+
+          <label class="checkbox-label">
+
+            <input
+              type="checkbox"
+              name="available"
+              [(ngModel)]="newMember.available"
+            />
+
+            <span>Available</span>
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <!-- Add Button -->
+      <button
+        type="submit"
+        class="add-button"
+        [disabled]="
+          !newMember.name.trim() ||
+          newMember.age === null ||
+          newMember.age <= 0 ||
+          !newMember.department
+        "
+      >
+        + Add Member
+      </button>
+
+    </form>
+
+  </section>
+
+
+  <!-- Controls -->
+  <section class="controls-section">
+
+    <!-- Department Filter -->
+    <div class="filter-control">
+
+      <label for="filter">
+        Department
+      </label>
+
+      <select
+        id="filter"
+        name="filter"
+        [(ngModel)]="selectedDepartment"
+      >
+
+        <option value="All">
+          All Departments
+        </option>
+
+        @for (department of departments; track department) {
+          <option [value]="department">
+            {{ department }}
+          </option>
+        }
+
+      </select>
+
+    </div>
+
+
+    <!-- View Selector -->
+    <div class="view-control">
+
+      <span>View</span>
+
+      <div class="view-buttons">
+
+        <button
+          type="button"
+          [class.active]="viewMode === 'card'"
+          (click)="viewMode = 'card'"
+        >
+          ▦ Cards
+        </button>
+
+        <button
+          type="button"
+          [class.active]="viewMode === 'list'"
+          (click)="viewMode = 'list'"
+        >
+          ☰ List
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- Team Members -->
+  <section class="members-section">
+
+    <!-- No Members At All -->
+    @if (teamMembers.length === 0) {
+
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+
+        <h3>No team members yet</h3>
+
+        <p>
+          Add your first team member using the form above.
+        </p>
+      </div>
+
+    }
+
+    <!-- Members Exist -->
+    @else {
+
+      <!-- No Members Match Filter -->
+      @if (filteredMembers.length === 0) {
+
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+
+          <h3>No members found</h3>
+
+          <p>
+            There are no members in the
+            <strong>{{ selectedDepartment }}</strong>
+            department.
+          </p>
+
+          <button
+            type="button"
+            class="reset-filter"
+            (click)="selectedDepartment = 'All'"
+          >
+            Show All Members
+          </button>
+        </div>
+
+      }
+
+      <!-- Members Found -->
+      @else {
+
+        <div class="results-header">
+
+          <h2>Team Members</h2>
+
+          <span>
+            {{ filteredMembers.length }}
+            member(s)
+          </span>
+
+        </div>
+
+
+        <!-- Switch Between Views -->
+        @switch (viewMode) {
+
+          <!-- ================= CARD VIEW ================= -->
+          @case ('card') {
+
+            <div class="members-grid">
+
+              @for (
+                member of filteredMembers;
+                track member.name
+              ) {
+
+                <div
+                  class="member-card"
+                  [class.available-card]="member.available"
+                  [class.unavailable-card]="!member.available"
+                >
+
+                  <div class="card-header">
+
+                    <div class="avatar">
+                      {{ member.name.charAt(0).toUpperCase() }}
+                    </div>
+
+                    <div class="member-info">
+
+                      <h3>
+                        {{ member.name }}
+                      </h3>
+
+                      <span class="department">
+                        {{ member.department }}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="member-details">
+
+                    <div class="detail">
+
+                      <span class="detail-label">
+                        Age
+                      </span>
+
+                      <strong>
+                        {{ member.age }}
+                      </strong>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                      <span class="detail-label">
+                        Department
+                      </span>
+
+                      <strong>
+                        {{ member.department }}
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                  <!-- Status -->
+                  <div class="status-row">
+
+                    @if (member.available) {
+
+                      <span class="status available">
+                        ● Available
+                      </span>
+
+                    }
+                    @else {
+
+                      <span class="status unavailable">
+                        ● Unavailable
+                      </span>
+
+                    }
+
+                  </div>
+
+
+                  <!-- Toggle -->
+                  <button
+                    type="button"
+                    class="toggle-button"
+                    (click)="toggleAvailability(member)"
+                  >
+
+                    @if (member.available) {
+                      Set Unavailable
+                    }
+                    @else {
+                      Set Available
+                    }
+
+                  </button>
+
+                </div>
+
+              }
+
+            </div>
+
+          }
+
+
+          <!-- ================= LIST VIEW ================= -->
+          @case ('list') {
+
+            <div class="members-list">
+
+              @for (
+                member of filteredMembers;
+                track member.name
+              ) {
+
+                <div class="list-item">
+
+                  <div class="list-member">
+
+                    <div class="list-avatar">
+                      {{ member.name.charAt(0).toUpperCase() }}
+                    </div>
+
+                    <div>
+
+                      <h3>
+                        {{ member.name }}
+                      </h3>
+
+                      <p>
+                        Age: {{ member.age }}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="list-department">
+                    {{ member.department }}
+                  </div>
+
+
+                  <div class="list-status">
+
+                    @if (member.available) {
+
+                      <span class="status available">
+                        ✔ Available
+                      </span>
+
+                    }
+                    @else {
+
+                      <span class="status unavailable">
+                        ✖ Unavailable
+                      </span>
+
+                    }
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    class="list-toggle"
+                    (click)="toggleAvailability(member)"
+                  >
+
+                    @if (member.available) {
+                      Make Unavailable
+                    }
+                    @else {
+                      Make Available
+                    }
+
+                  </button>
+
+                </div>
+
+              }
+
+            </div>
+
+          }
+
+
+          <!-- Default View -->
+          @default {
+
+            <div class="empty-state">
+
+              <h3>
+                Invalid view mode
+              </h3>
+
+              <p>
+                Please select Card or List view.
+              </p>
+
+            </div>
+
+          }
+
+        }
+
+      }
+
+    }
+
+  </section>
+
+</div>
+

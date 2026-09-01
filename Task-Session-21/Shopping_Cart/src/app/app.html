@@ -1,0 +1,103 @@
+<div class="container">
+
+  <header>
+    <h1>Shopping Cart</h1>
+    <p>Angular Signals Shopping Cart</p>
+  </header>
+
+  <section class="products-section">
+    <h2>Products</h2>
+
+    <div class="products-grid">
+
+      @for (product of products; track product.id) {
+
+        <div class="product-card">
+
+          <h3>{{ product.name }}</h3>
+
+          <p class="price">
+            ${{ product.price }}
+          </p>
+
+          <button (click)="addToCart(product)">
+            Add To Cart
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+  </section>
+
+
+  <section class="cart-section">
+
+    <div class="cart-header">
+      <h2>Cart</h2>
+
+      @if (cart().length > 0) {
+        <button
+          class="clear-btn"
+          (click)="clearCart()">
+          Clear Cart
+        </button>
+      }
+    </div>
+
+
+    @if (cart().length === 0) {
+
+      <div class="empty-cart">
+        <p>Your cart is empty</p>
+      </div>
+
+    } @else {
+
+      <div class="cart-items">
+
+        @for (product of cart(); track product.id) {
+
+          <div class="cart-item">
+
+            <div>
+              <h3>{{ product.name }}</h3>
+
+              <p>
+                ${{ product.price }}
+              </p>
+            </div>
+
+            <button
+              class="remove-btn"
+              (click)="removeFromCart(product.id)">
+              Remove
+            </button>
+
+          </div>
+
+        }
+
+      </div>
+
+
+      <div class="cart-summary">
+
+        <h3>
+          Total Price:
+          ${{ totalPrice() }}
+        </h3>
+
+        <p>
+          Items:
+          {{ cart().length }}
+        </p>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

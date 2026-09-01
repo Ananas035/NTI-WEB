@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Return = require('../models/Return');
 const Product = require('../models/Product');
 const Customer = require('../models/Customer');
@@ -35,6 +36,8 @@ const generateReturnNumber = async () => {
 // ============================================
 
 exports.createReturn = async (req, res) => {
+    const session = await mongoose.startSession();
+
     try {
 
         const {
@@ -42,7 +45,6 @@ exports.createReturn = async (req, res) => {
             items,
             notes
         } = req.body;
-
 
         // --------------------------------------------
         // 1. Validate customer
@@ -55,10 +57,9 @@ exports.createReturn = async (req, res) => {
             });
         }
 
-
         const customer = await Customer.findOne({
             customerId: Number(customerId)
-        });
+        }).session(session);
 
         if (!customer) {
             return res.status(404).json({
@@ -66,7 +67,6 @@ exports.createReturn = async (req, res) => {
                 message: 'Customer not found'
             });
         }
-
 
         // --------------------------------------------
         // 2. Validate items
@@ -79,162 +79,161 @@ exports.createReturn = async (req, res) => {
             });
         }
 
+        let createdReturn;
 
-        // --------------------------------------------
-        // 3. Prepare return items
-        // --------------------------------------------
+        // ============================================
+        // START TRANSACTION
+        // ============================================
 
-        const returnItems = [];
-
-        let returnTotal = 0;
-
-
-        for (const item of items) {
-
-            const modelCode = Number(item.modelCode);
-            const quantity = Number(item.quantity);
-
-
-            // Validate model code
-
-            if (!modelCode || modelCode <= 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Valid model code is required'
-                });
-            }
-
-
-            // Validate quantity
-
-            if (!quantity || quantity <= 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Invalid quantity for model ${modelCode}`
-                });
-            }
-
+        await session.withTransaction(async () => {
 
             // --------------------------------------------
-            // Find product by MODEL CODE
+            // 3. Prepare return items
             // --------------------------------------------
 
-            const product = await Product.findOne({
-                modelCode
+            const returnItems = [];
+            let returnTotal = 0;
+
+            for (const item of items) {
+
+                const modelCode = Number(item.modelCode);
+                const quantity = Number(item.quantity);
+
+                // Validate model code
+                if (!modelCode || modelCode <= 0) {
+                    throw new Error(
+                        'Valid model code is required'
+                    );
+                }
+
+                // Validate quantity
+                if (!quantity || quantity <= 0) {
+                    throw new Error(
+                        `Invalid quantity for model ${modelCode}`
+                    );
+                }
+
+                // Find product
+                const product = await Product.findOne({
+                    modelCode
+                }).session(session);
+
+                if (!product) {
+                    throw new Error(
+                        `Product with model code ${modelCode} not found`
+                    );
+                }
+
+                // --------------------------------------------
+                // Calculate price
+                // --------------------------------------------
+
+                const unitPrice = product.price;
+
+                const total = quantity * unitPrice;
+
+                returnItems.push({
+                    product: product._id,
+                    modelCode: product.modelCode,
+                    quantity,
+                    unitPrice,
+                    total
+                });
+
+                returnTotal += total;
+            }
+
+            // --------------------------------------------
+            // 4. Generate return number
+            // --------------------------------------------
+
+            const returnNumber = await generateReturnNumber();
+
+            // --------------------------------------------
+            // 5. Create Return
+            // --------------------------------------------
+
+            const newReturn = new Return({
+                returnNumber,
+                customer: customer._id,
+                items: returnItems,
+                returnTotal,
+                notes: notes || ''
             });
 
-            if (!product) {
-                return res.status(404).json({
-                    success: false,
-                    message: `Product with model code ${modelCode} not found`
-                });
-            }
-
+            await newReturn.save({ session });
 
             // --------------------------------------------
-            // Calculate item total
+            // 6. Update Inventory
             // --------------------------------------------
 
-            const unitPrice = product.price;
+            for (const item of returnItems) {
 
-            const total = quantity * unitPrice;
+                const product = await Product.findById(
+                    item.product
+                ).session(session);
 
+                if (!product) {
+                    throw new Error(
+                        `Product not found for model ${item.modelCode}`
+                    );
+                }
 
-            returnItems.push({
-                product: product._id,
-                modelCode: product.modelCode,
-                quantity,
-                unitPrice,
-                total
-            });
+                const previousInventory =
+                    product.availablePieces;
 
+                const currentInventory =
+                    previousInventory + item.quantity;
 
-            returnTotal += total;
-        }
+                // Update inventory
+                product.availablePieces = currentInventory;
 
+                await product.save({ session });
 
-        // --------------------------------------------
-        // 4. Generate Return Number
-        // --------------------------------------------
-
-        const returnNumber = await generateReturnNumber();
-
-
-        // --------------------------------------------
-        // 5. Create Return
-        // --------------------------------------------
-
-        const newReturn = await Return.create({
-            returnNumber,
-            customer: customer._id,
-            items: returnItems,
-            returnTotal,
-            notes: notes || ''
-        });
-
-
-        // --------------------------------------------
-        // 6. Update Inventory
-        // --------------------------------------------
-
-        for (const item of returnItems) {
-
-            const product = await Product.findById(item.product);
-
-            if (!product) {
-                throw new Error(
-                    `Product not found for model ${item.modelCode}`
+                // Create inventory transaction
+                await InventoryTransaction.create(
+                    [
+                        {
+                            product: product._id,
+                            transactionType: 'RETURN',
+                            quantity: item.quantity,
+                            previousInventory,
+                            currentInventory,
+                            referenceNumber: returnNumber
+                        }
+                    ],
+                    { session }
                 );
             }
 
-
-            const previousInventory = product.availablePieces;
-
-            const currentInventory =
-                previousInventory + item.quantity;
-
-
-            // Update product inventory
-
-            product.availablePieces = currentInventory;
-
-            await product.save();
-
-
             // --------------------------------------------
-            // Create Inventory Transaction
+            // 7. Create Account Transaction
             // --------------------------------------------
 
-            await InventoryTransaction.create({
-                product: product._id,
-                transactionType: 'RETURN',
-                quantity: item.quantity,
-                previousInventory,
-                currentInventory,
-                referenceNumber: returnNumber
-            });
-        }
+            await AccountTransaction.create(
+                [
+                    {
+                        customer: customer._id,
+                        transactionType: 'RETURN',
+                        amount: returnTotal,
+                        referenceNumber: returnNumber,
+                        paymentMethod: null,
+                        notes: `Return ${returnNumber}`
+                    }
+                ],
+                { session }
+            );
 
-
-        // --------------------------------------------
-        // 7. Create Account Transaction
-        // --------------------------------------------
-
-        await AccountTransaction.create({
-            customer: customer._id,
-            transactionType: 'RETURN',
-            amount: returnTotal,
-            referenceNumber: returnNumber,
-            paymentMethod: null,
-            notes: `Return ${returnNumber}`
+            createdReturn = newReturn;
         });
 
+        // ============================================
+        // TRANSACTION COMMITTED
+        // ============================================
 
-        // --------------------------------------------
-        // 8. Populate response
-        // --------------------------------------------
-
-        const populatedReturn = await Return.findById(newReturn._id)
+        const populatedReturn = await Return.findById(
+            createdReturn._id
+        )
             .populate(
                 'customer',
                 'customerId name showroomName mobileNumber address'
@@ -244,28 +243,25 @@ exports.createReturn = async (req, res) => {
                 'modelName modelCode price'
             );
 
-
-        // --------------------------------------------
-        // 9. Response
-        // --------------------------------------------
-
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             data: populatedReturn
         });
-
 
     } catch (error) {
 
         console.error('Create Return Error:', error);
 
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             message: error.message
         });
+
+    } finally {
+
+        await session.endSession();
     }
 };
-
 
 
 // ============================================

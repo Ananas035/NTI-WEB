@@ -7,11 +7,12 @@ const {
 } = require('../controllers/return-controller');
 
 const router = express.Router();
+const protect = require('../middleware/auth-middleware');
 
-router.post('/', createReturn);
+router.post('/', protect, createReturn);
 
-router.get('/', getReturns);
+router.get('/', protect, getReturns);
 
-router.get('/:returnNumber', getReturnByNumber);
+router.get('/:returnNumber', protect, getReturnByNumber);
 
 module.exports = router;

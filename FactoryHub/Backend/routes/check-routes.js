@@ -8,13 +8,14 @@ const {
 } = require('../controllers/check-controller');
 
 const router = express.Router();
+const protect = require('../middleware/auth-middleware');
 
-router.post('/', createCheck);
+router.post('/', protect, createCheck);
 
-router.get('/', getChecks);
+router.get('/', protect, getChecks);
 
-router.get('/:checkNumber', getCheckByNumber);
+router.get('/:checkNumber', protect, getCheckByNumber);
 
-router.patch('/:checkNumber/collect', collectCheck);
+router.patch('/:checkNumber/collect', protect, collectCheck);
 
 module.exports = router;

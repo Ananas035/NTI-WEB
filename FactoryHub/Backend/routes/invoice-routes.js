@@ -7,11 +7,12 @@ const {
 } = require('../controllers/invoice-controller');
 
 const router = express.Router();
+const protect = require('../middleware/auth-middleware');
 
-router.post('/', createInvoice);
+router.post('/', protect, createInvoice);
 
-router.get('/', getInvoices);
+router.get('/', protect, getInvoices);
 
-router.get('/:invoiceNumber', getInvoiceByNumber);
+router.get('/:invoiceNumber', protect, getInvoiceByNumber);
 
 module.exports = router;

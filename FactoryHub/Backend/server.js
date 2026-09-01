@@ -15,6 +15,7 @@ const returnRoutes = require('./routes/return-routes');
 const accountRoutes = require('./routes/account-routes');
 const paymentRoutes = require('./routes/payment-routes');
 const checkRoutes = require('./routes/check-routes');
+const authRoutes = require('./routes/auth-routes');
 
 connectDB();
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/returns', returnRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/checks', checkRoutes);
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 

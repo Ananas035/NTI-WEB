@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Invoice = require('../models/Invoice');
 const Customer = require('../models/Customer');
 const Product = require('../models/Product');
@@ -25,9 +26,9 @@ const generateInvoiceNumber = async () => {
 };
 
 
-// @desc    Create a new invoice
-// @route   POST /api/invoices
 exports.createInvoice = async (req, res) => {
+    const session = await mongoose.startSession();
+
     try {
         const { customerId, items } = req.body;
 
@@ -49,14 +50,13 @@ exports.createInvoice = async (req, res) => {
             });
         }
 
-
         // -----------------------------------
         // 2. Find customer
         // -----------------------------------
 
         const customer = await Customer.findOne({
             customerId: Number(customerId)
-        });
+        }).session(session);
 
         if (!customer) {
             return res.status(404).json({
@@ -65,174 +65,193 @@ exports.createInvoice = async (req, res) => {
             });
         }
 
+        let createdInvoice;
 
-        // -----------------------------------
-        // 3. Prepare invoice items
-        // -----------------------------------
+        // ===================================
+        // START MONGODB TRANSACTION
+        // ===================================
 
-        const invoiceItems = [];
-
-        let invoiceTotal = 0;
-
-
-        // -----------------------------------
-        // 4. Process every model
-        // -----------------------------------
-
-        for (const item of items) {
-
-            const modelCode = Number(item.modelCode);
-            const quantity = Number(item.quantity);
-
-
-            // Validate model code
-            if (!modelCode) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Model code is required'
-                });
-            }
-
-
-            // Validate quantity
-            if (!quantity || quantity <= 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Invalid quantity for model ${modelCode}`
-                });
-            }
-
-
-            // Find product by model code
-            const product = await Product.findOne({
-                modelCode
-            });
-
-
-            if (!product) {
-                return res.status(404).json({
-                    success: false,
-                    message: `Product with model code ${modelCode} not found`
-                });
-            }
-
+        await session.withTransaction(async () => {
 
             // -----------------------------------
-            // 5. Check stock
+            // 3. Prepare invoice items
             // -----------------------------------
 
-            if (product.availablePieces < quantity) {
-                return res.status(400).json({
-                    success: false,
-                    message:
+            const invoiceItems = [];
+            let invoiceTotal = 0;
+
+            // -----------------------------------
+            // 4. Process every model
+            // -----------------------------------
+
+            for (const item of items) {
+
+                const modelCode = Number(item.modelCode);
+                const quantity = Number(item.quantity);
+
+                // Validate model code
+                if (!modelCode || modelCode <= 0) {
+                    throw new Error('Valid model code is required');
+                }
+
+                // Validate quantity
+                if (!quantity || quantity <= 0) {
+                    throw new Error(
+                        `Invalid quantity for model ${modelCode}`
+                    );
+                }
+
+                // Find product
+                const product = await Product.findOne({
+                    modelCode
+                }).session(session);
+
+                if (!product) {
+                    throw new Error(
+                        `Product with model code ${modelCode} not found`
+                    );
+                }
+
+                // -----------------------------------
+                // Check stock
+                // -----------------------------------
+
+                if (product.availablePieces < quantity) {
+                    throw new Error(
                         `Not enough stock for model ${modelCode}. ` +
                         `Available: ${product.availablePieces}, ` +
                         `Requested: ${quantity}`
+                    );
+                }
+
+                // -----------------------------------
+                // Get price automatically
+                // -----------------------------------
+
+                const unitPrice = product.price;
+
+                // -----------------------------------
+                // Calculate total
+                // -----------------------------------
+
+                const itemTotal = quantity * unitPrice;
+
+                invoiceItems.push({
+                    product: product._id,
+                    modelCode: product.modelCode,
+                    quantity,
+                    unitPrice,
+                    total: itemTotal
                 });
+
+                invoiceTotal += itemTotal;
             }
 
-
             // -----------------------------------
-            // 6. Get price automatically
-            // -----------------------------------
-
-            const unitPrice = product.price;
-
-
-            // -----------------------------------
-            // 7. Calculate item total
+            // 5. Generate invoice number
             // -----------------------------------
 
-            const itemTotal = quantity * unitPrice;
-
+            const invoiceNumber = await generateInvoiceNumber();
 
             // -----------------------------------
-            // 8. Add item to invoice
+            // 6. Create Invoice
             // -----------------------------------
 
-            invoiceItems.push({
-                product: product._id,
-                modelCode: product.modelCode,
-                quantity,
-                unitPrice,
-                total: itemTotal
+            const invoice = new Invoice({
+                invoiceNumber,
+                customer: customer._id,
+                items: invoiceItems,
+                invoiceTotal
             });
 
+            await invoice.save({ session });
 
-            // Add to invoice total
-            invoiceTotal += itemTotal;
-        }
+            // -----------------------------------
+            // 7. Create Account Transaction
+            // -----------------------------------
 
+            await AccountTransaction.create(
+                [
+                    {
+                        customer: customer._id,
+                        transactionType: 'INVOICE',
+                        amount: invoiceTotal,
+                        referenceNumber: invoice.invoiceNumber,
+                        paymentMethod: null,
+                        notes: `Invoice ${invoice.invoiceNumber}`
+                    }
+                ],
+                { session }
+            );
 
-        // -----------------------------------
-        // 9. Generate invoice number
-        // -----------------------------------
+            // -----------------------------------
+            // 8. Update Inventory
+            // -----------------------------------
 
-        const invoiceNumber = await generateInvoiceNumber();
+            for (const item of invoiceItems) {
 
+                const product = await Product.findById(
+                    item.product
+                ).session(session);
 
-        // -----------------------------------
-        // 10. Create invoice
-        // -----------------------------------
+                if (!product) {
+                    throw new Error(
+                        `Product not found for model ${item.modelCode}`
+                    );
+                }
 
-        const invoice = await Invoice.create({
-            invoiceNumber,
-            customer: customer._id,
-            items: invoiceItems,
-            invoiceTotal
+                const previousInventory = product.availablePieces;
+
+                if (previousInventory < item.quantity) {
+                    throw new Error(
+                        `Not enough stock for model ${item.modelCode}`
+                    );
+                }
+
+                const currentInventory =
+                    previousInventory - item.quantity;
+
+                // Update product
+                product.availablePieces = currentInventory;
+
+                await product.save({ session });
+
+                // Create inventory transaction
+                await InventoryTransaction.create(
+                    [
+                        {
+                            product: product._id,
+                            transactionType: 'SALE',
+                            quantity: item.quantity,
+                            previousInventory,
+                            currentInventory,
+                            referenceNumber: invoice.invoiceNumber
+                        }
+                    ],
+                    { session }
+                );
+            }
+
+            createdInvoice = invoice;
         });
 
-        await AccountTransaction.create({
-            customer: customer._id,
-            transactionType: 'INVOICE',
-            amount: invoiceTotal,
-            referenceNumber: invoice.invoiceNumber,
-            notes: `Invoice ${invoice.invoiceNumber}`
-        });
+        // ===================================
+        // TRANSACTION COMMITTED
+        // ===================================
 
+        const populatedInvoice = await Invoice.findById(
+            createdInvoice._id
+        )
+            .populate(
+                'customer',
+                'customerId name showroomName mobileNumber address'
+            )
+            .populate(
+                'items.product',
+                'modelName modelCode price'
+            );
 
-        // -----------------------------------
-        // 11. Update inventory
-        // -----------------------------------
-
-        for (const item of invoiceItems) {
-
-            const product = await Product.findById(item.product);
-
-            const previousInventory = product.availablePieces;
-
-            const currentInventory =
-                previousInventory - item.quantity;
-
-
-            // Update product stock
-            product.availablePieces = currentInventory;
-
-            await product.save();
-
-
-            // Create inventory transaction
-            await InventoryTransaction.create({
-                product: product._id,
-                transactionType: 'SALE',
-                quantity: item.quantity,
-                previousInventory,
-                currentInventory,
-                referenceNumber: invoice.invoiceNumber
-            });
-        }
-
-
-        // -----------------------------------
-        // 12. Return invoice
-        // -----------------------------------
-
-        const populatedInvoice = await Invoice.findById(invoice._id)
-            .populate('customer', 'customerId name showroomName mobileNumber address')
-            .populate('items.product', 'modelName modelCode price');
-
-
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             data: populatedInvoice
         });
@@ -241,13 +260,16 @@ exports.createInvoice = async (req, res) => {
 
         console.error('Create Invoice Error:', error);
 
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             message: error.message
         });
+
+    } finally {
+
+        await session.endSession();
     }
 };
-
 
 // @desc    Get all invoices
 // @route   GET /api/invoices

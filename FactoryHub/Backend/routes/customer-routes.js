@@ -9,14 +9,16 @@ const {
     } = require('../controllers/customer-controller');
 
     const router = express.Router();
+    const protect = require('../middleware/auth-middleware');
+    const authorize = require('../middleware/role-middleware');
 
     router.route('/')
-    .get(getCustomers)
-    .post(createCustomer);
+    .get(protect, getCustomers)
+    .post(protect, createCustomer);
 
     router.route('/:id')
-    .get(getCustomerById)
-    .patch(updateCustomer)
-    .delete(deleteCustomer);
+    .get(protect, getCustomerById)
+    .patch(protect, updateCustomer)
+    .delete(protect, authorize('ADMIN'), deleteCustomer);
 
     module.exports = router;

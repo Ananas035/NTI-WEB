@@ -8,17 +8,19 @@ const {
 } = require('../controllers/inventory-controller');
 
 const router = express.Router();
+const protect = require('../middleware/auth-middleware');
+const authorize = require('../middleware/role-middleware');
 
 // Create inventory transaction
-router.post('/', createInventoryTransaction);
+router.post('/', protect, authorize('ADMIN'), createInventoryTransaction);
 
 // Restock existing product
-router.post('/restock/:modelCode', restockProduct);
+router.post('/restock/:modelCode', protect, authorize('ADMIN'), restockProduct);
 
 // Get all inventory transactions
-router.get('/', getInventoryTransactions);
+router.get('/', protect, getInventoryTransactions);
 
 // Get transactions for a specific model
-router.get('/model/:modelCode', getInventoryByModelCode);
+router.get('/model/:modelCode', protect, getInventoryByModelCode);
 
 module.exports = router;

@@ -48,6 +48,11 @@ const accountTransactionSchema = new mongoose.Schema(
     }
 );
 
+accountTransactionSchema.index(
+    { transactionType: 1, referenceNumber: 1 },
+    { unique: true }
+);
+
 module.exports = mongoose.model(
     'AccountTransaction',
     accountTransactionSchema

@@ -1,5 +1,7 @@
 const express = require('express');
 const upload = require('../middleware/upload');
+const protect = require('../middleware/auth-middleware');
+const authorize = require('../middleware/role-middleware');
 
 const {
     createProduct,
@@ -15,15 +17,15 @@ const router = express.Router();
 // Get all products
 // Create new product
 router.route('/')
-    .get(getProducts)
-    .post(upload.single('image'), createProduct);
+    .get(protect, getProducts)
+    .post(protect, authorize('ADMIN'), upload.single('image'), createProduct);
 
 
 // Get / Update / Delete by Model Code
 router.route('/code/:modelCode')
-    .get(getProductByCode)
-    .patch(upload.single('image'), updateProduct)
-    .delete(deleteProduct);
+    .get(protect, getProductByCode)
+    .patch(protect, authorize('ADMIN'), upload.single('image'), updateProduct)
+    .delete(protect, authorize('ADMIN'), deleteProduct);
 
 
 module.exports = router;

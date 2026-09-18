@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --font-en: 'Plus Jakarta Sans', sans-serif;
+  --font-ar: 'Noto Sans Arabic', sans-serif;
+
+  --navy-950: #0a0f1e;
+  --navy-900: #0d1526;
+  --primary-blue: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  
+  --text-dark: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  
+  --success-bg: #ecfdf5;
+  --success-text: #047857;
+  --warning-bg: #fffbeb;
+  --warning-text: #b45309;
+  --purple-bg: #f5f3ff;
+  --purple-text: #6d28d9;
+  --danger-bg: #fef2f2;
+  --danger-text: #b91c1c;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-ar), var(--font-en);
+  background-color: var(--bg-main);
+  color: var(--text-dark);
+  direction: rtl; 
+}
+
+[dir="ltr"] body, [dir="ltr"] {
+  font-family: var(--font-en), var(--font-ar);
+  direction: ltr;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@media print {
+  app-sidebar,
+  app-header,
+  .print-hide {
+    display: none !important;
+  }
+
+  body, html, .app-layout, .main-wrapper, .content-body {
+    background: #ffffff !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+html[dir="ltr"] {
+  text-align: left;
+}
+
+html[dir="rtl"] {
+  text-align: right;
+}
+
+html[dir="ltr"] .data-table,
+html[dir="ltr"] .action-btn {
+  text-align: left;
+}

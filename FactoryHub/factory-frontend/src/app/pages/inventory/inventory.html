@@ -1,0 +1,928 @@
+<div class="inventory-container">
+
+  <!-- ========================= -->
+  <!-- Header -->
+  <!-- ========================= -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h1 class="title">
+        {{ 'inventory_title' | translate }}
+      </h1>
+
+      <p class="subtitle">
+        {{ 'inventory_registered_models' | translate }}
+        <strong>
+          {{ products.length }}
+        </strong>
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Error -->
+  <!-- ========================= -->
+
+  <div
+    class="alert-error"
+    *ngIf="errorMessage"
+  >
+    {{ errorMessage | translate }}
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Statistics -->
+  <!-- ========================= -->
+
+  <div class="stats-grid">
+
+
+    <!-- Models -->
+
+    <div class="stat-card blue">
+
+      <div class="stat-icon-wrap blue">
+
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+
+          <path
+            d="M10 2 L18 6.5 V13.5 L10 18 L2 13.5 V6.5 Z M10 2 L10 18M2 6.5 L10 11 L18 6.5"
+          />
+
+        </svg>
+
+      </div>
+
+      <div class="stat-info">
+
+        <span class="stat-label">
+          {{ 'inventory_total_models' | translate }}
+        </span>
+
+        <strong class="stat-value">
+          {{ products.length }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- Available -->
+
+    <div class="stat-card green">
+
+      <div class="stat-icon-wrap green">
+
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+
+          <path
+            d="M2 18V9L10 3l8 6v9H2Z M7 12h6v6H7z"
+          />
+
+        </svg>
+
+      </div>
+
+      <div class="stat-info">
+
+        <span class="stat-label">
+          {{ 'inventory_total_available' | translate }}
+        </span>
+
+        <strong class="stat-value">
+          {{ totalAvailablePieces | number }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- Sold -->
+
+    <div class="stat-card red">
+
+      <div class="stat-icon-wrap red">
+
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+
+          <path
+            d="M3 5h14M5 5v11h10V5M7 8h6M7 11h6"
+          />
+
+        </svg>
+
+      </div>
+
+      <div class="stat-info">
+
+        <span class="stat-label">
+          {{ 'inventory_total_sold' | translate }}
+        </span>
+
+        <strong class="stat-value">
+          {{ totalSoldPieces | number }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- Returned -->
+
+    <div class="stat-card amber">
+
+      <div class="stat-icon-wrap amber">
+
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+
+          <path
+            d="M4 7h9a4 4 0 0 1 0 8H7 M7 4L4 7l3 3"
+          />
+
+        </svg>
+
+      </div>
+
+      <div class="stat-info">
+
+        <span class="stat-label">
+          {{ 'inventory_total_returned' | translate }}
+        </span>
+
+        <strong class="stat-value">
+          {{ totalReturnedPieces | number }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- Low Stock -->
+
+    <div class="stat-card amber">
+
+      <div class="stat-icon-wrap amber">
+
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+
+          <path
+            d="M2 11 L6 7 L9 9 L14 4 M11 4h3v3"
+          />
+
+        </svg>
+
+      </div>
+
+      <div class="stat-info">
+
+        <span class="stat-label">
+          {{ 'inventory_low_stock_stat' | translate }}
+        </span>
+
+        <strong class="stat-value">
+          {{ lowStockCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- Out -->
+
+    <div class="stat-card red">
+
+      <div class="stat-icon-wrap red">
+
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+
+          <path
+            d="M4 4l12 12M16 4L4 16"
+          />
+
+        </svg>
+
+      </div>
+
+      <div class="stat-info">
+
+        <span class="stat-label">
+          {{ 'inventory_out_of_stock' | translate }}
+        </span>
+
+        <strong class="stat-value">
+          {{ outOfStockCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Toolbar -->
+  <!-- ========================= -->
+
+  <div class="toolbar-card">
+
+
+    <!-- Search -->
+
+    <div class="search-wrapper">
+
+      <svg
+        class="search-icon"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+      >
+
+        <circle
+          cx="8.5"
+          cy="8.5"
+          r="5"
+          stroke-width="1.5"
+        />
+
+        <path
+          d="M13 13l3.5 3.5"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+
+      </svg>
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        [placeholder]="'inventory_search_placeholder' | translate"
+        class="search-input"
+      />
+
+    </div>
+
+
+    <!-- Filters -->
+
+    <div class="filter-pills">
+
+      <button
+        class="pill"
+        type="button"
+        [class.active]="filterStatus === 'All'"
+        (click)="setFilter('All')"
+      >
+        {{ 'inventory_filter_all' | translate }}
+      </button>
+
+      <button
+        class="pill"
+        type="button"
+        [class.active]="filterStatus === 'inStock'"
+        (click)="setFilter('inStock')"
+      >
+        {{ 'inventory_filter_in_stock' | translate }}
+      </button>
+
+      <button
+        class="pill"
+        type="button"
+        [class.active]="filterStatus === 'lowStock'"
+        (click)="setFilter('lowStock')"
+      >
+        {{ 'inventory_filter_low_stock' | translate }}
+      </button>
+
+      <button
+        class="pill"
+        type="button"
+        [class.active]="filterStatus === 'outOfStock'"
+        (click)="setFilter('outOfStock')"
+      >
+        {{ 'inventory_filter_out_of_stock' | translate }}
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Inventory Table -->
+  <!-- ========================= -->
+
+  <div class="table-card">
+
+    <div class="table-responsive">
+
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+
+            <th style="width: 70px;">
+              {{ 'inventory_col_image' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_model_name' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_code' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_total_added' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_sold' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_returned' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_current' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_price' | translate }}
+            </th>
+
+            <th>
+              {{ 'inventory_col_status' | translate }}
+            </th>
+
+            <th style="width: 80px;">
+              {{ 'inventory_col_history' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+
+          <!-- Loading -->
+
+          <tr *ngIf="isLoading">
+
+            <td
+              colspan="10"
+              class="empty-state"
+            >
+              {{ 'inventory_loading' | translate }}
+            </td>
+
+          </tr>
+
+
+          <!-- Data -->
+
+          <tr
+            *ngFor="
+              let item of filteredInventory
+            "
+          >
+
+
+            <!-- Image -->
+
+            <td>
+
+              <div class="thumb-box">
+
+                <img
+                  *ngIf="item.image"
+                  [src]="getImageUrl(item.image)"
+                  [alt]="item.name"
+                  class="thumb-img"
+                />
+
+                <span
+                  *ngIf="!item.image"
+                  class="no-img"
+                >
+                  {{ 'inventory_no_image' | translate }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- Name -->
+
+            <td>
+
+              <div class="model-cell">
+
+                <span class="name">
+                  {{ item.name }}
+                </span>
+
+                <div class="colors-dots">
+
+                  <span
+                    class="color-dot"
+                    *ngFor="
+                      let c of item.colors.slice(0, 3)
+                    "
+                    [title]="c"
+                  ></span>
+
+                  <span
+                    class="color-more"
+                    *ngIf="item.colors.length > 3"
+                  >
+                    +{{ item.colors.length - 3 }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Code -->
+
+            <td>
+
+              <span class="code-badge">
+                #{{ item.code }}
+              </span>
+
+            </td>
+
+
+            <!-- Added -->
+
+            <td>
+
+              <span class="qty-added">
+                {{ item.added | number }}
+                {{ 'inventory_piece' | translate }}
+              </span>
+
+            </td>
+
+
+            <!-- Sold -->
+
+            <td>
+
+              <span class="qty-sold">
+                {{ item.sold | number }}
+                {{ 'inventory_piece' | translate }}
+              </span>
+
+            </td>
+
+
+            <!-- Returned -->
+
+            <td>
+
+              <span class="qty-returned">
+                {{ item.returned | number }}
+                {{ 'inventory_piece' | translate }}
+              </span>
+
+            </td>
+
+
+            <!-- Available -->
+
+            <td class="qty-cell">
+
+              <strong>
+                {{ item.available | number }}
+              </strong>
+
+              {{ 'inventory_piece' | translate }}
+
+            </td>
+
+
+            <!-- Price -->
+
+            <td class="price-cell">
+
+              {{
+                item.price
+                  ? ((item.price | number) + ' ' + ('inventory_currency' | translate))
+                  : '—'
+              }}
+
+            </td>
+
+
+            <!-- Status -->
+
+            <td>
+
+              <span
+                class="stock-badge"
+                [ngClass]="item.status"
+              >
+
+                {{
+                  item.status === 'inStock'
+                    ? ('inventory_status_in_stock' | translate)
+                    : (
+                        item.status === 'lowStock'
+                          ? ('inventory_status_low_stock' | translate)
+                          : ('inventory_status_out_of_stock' | translate)
+                      )
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- History -->
+
+            <td>
+
+              <button
+                class="btn-icon history"
+                type="button"
+                (click)="openHistory(item)"
+                [attr.title]="'inventory_history_button' | translate"
+              >
+
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                >
+
+                  <path
+                    d="M10 3v7l4 4"
+                  />
+
+                  <circle
+                    cx="10"
+                    cy="10"
+                    r="8"
+                  />
+
+                </svg>
+
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty -->
+
+          <tr
+            *ngIf="
+              !isLoading &&
+              filteredInventory.length === 0
+            "
+          >
+
+            <td
+              colspan="10"
+              class="empty-state"
+            >
+              {{ 'inventory_no_matching' | translate }}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- History Modal -->
+  <!-- ====================================================== -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="historyTarget"
+  >
+
+    <div class="modal-box history-modal">
+
+
+      <!-- Header -->
+
+      <div class="modal-header">
+
+        <div class="header-badge-title">
+
+          <div class="badge-icon-blue">
+
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <path
+                d="M10 3v7l4 4"
+              />
+
+              <circle
+                cx="10"
+                cy="10"
+                r="8"
+              />
+
+            </svg>
+
+          </div>
+
+
+          <div>
+
+            <h2>
+              {{ 'inventory_history_title' | translate }}
+            </h2>
+
+            <p class="header-sub">
+
+              {{ historyTarget.name }}
+
+              ({{ 'inventory_code_label' | translate }}:
+              #{{ historyTarget.code }}
+              )
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="btn-close"
+          type="button"
+          (click)="closeHistory()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Body -->
+
+      <div class="modal-body">
+
+
+        <!-- Loading -->
+
+        <div
+          class="history-loading"
+          *ngIf="historyLoading"
+        >
+          {{ 'inventory_history_loading' | translate }}
+        </div>
+
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="historyError"
+        >
+          {{ historyError | translate }}
+        </div>
+
+
+        <!-- Table -->
+
+        <div class="table-responsive">
+
+          <table class="data-table small">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  {{ 'inventory_history_date' | translate }}
+                </th>
+
+                <th>
+                  {{ 'inventory_history_type' | translate }}
+                </th>
+
+                <th>
+                  {{ 'inventory_history_reference' | translate }}
+                </th>
+
+                <th>
+                  {{ 'inventory_history_quantity' | translate }}
+                </th>
+
+                <th>
+                  {{ 'inventory_history_before' | translate }}
+                </th>
+
+                <th>
+                  {{ 'inventory_history_after' | translate }}
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr
+                *ngFor="let h of historyRecords"
+              >
+
+                <!-- Date -->
+
+                <td>
+                  {{ h.date }}
+                </td>
+
+
+                <!-- Type -->
+
+                <td>
+
+                  <span
+                    class="type-pill"
+                    [ngClass]="h.type"
+                  >
+
+                    {{
+                      h.type === 'new_model'
+                        ? ('inventory_history_new_model' | translate)
+                        : (
+                            h.type === 'restock'
+                              ? ('inventory_history_restock' | translate)
+                              : (
+                                  h.type === 'invoice'
+                                    ? ('inventory_history_invoice' | translate)
+                                    : ('inventory_history_return' | translate)
+                                )
+                          )
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- Ref -->
+
+                <td class="mono-bold">
+                  {{ h.ref }}
+                </td>
+
+
+                <!-- Quantity -->
+
+                <td
+                  class="font-bold"
+                  [class.text-green]="h.quantity > 0"
+                  [class.text-red]="h.quantity < 0"
+                >
+
+                  {{
+                    h.quantity > 0
+                      ? '+'
+                      : ''
+                  }}
+
+                  {{ h.quantity }}
+
+                </td>
+
+
+                <!-- Before -->
+
+                <td class="text-muted">
+                  {{ h.stockBefore | number }}
+                </td>
+
+
+                <!-- After -->
+
+                <td class="font-bold text-dark">
+
+                  {{ h.stockAfter | number }}
+
+                  {{ 'inventory_piece' | translate }}
+
+                </td>
+
+              </tr>
+
+
+              <!-- Empty -->
+
+              <tr
+                *ngIf="
+                  !historyLoading &&
+                  historyRecords.length === 0
+                "
+              >
+
+                <td
+                  colspan="6"
+                  class="empty-state"
+                >
+                  {{ 'inventory_no_history' | translate }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+      <!-- Footer -->
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-secondary full-width"
+          type="button"
+          (click)="closeHistory()"
+        >
+          {{ 'inventory_close' | translate }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

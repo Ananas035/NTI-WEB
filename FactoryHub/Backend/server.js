@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const dns = require('dns');
@@ -19,6 +20,9 @@ const authRoutes = require('./routes/auth-routes');
 
 connectDB();
 const app = express();
+app.use(cors({
+    origin: 'http://localhost:4200'
+}));
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

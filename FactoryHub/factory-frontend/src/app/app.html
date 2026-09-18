@@ -1,0 +1,15 @@
+<div *ngIf="isAuthPage">
+  <router-outlet></router-outlet>
+</div>
+
+<div class="app-layout" *ngIf="!isAuthPage">
+  <app-sidebar [isCollapsed]="isSidebarCollapsed"></app-sidebar>
+
+  <div class="main-wrapper">
+    <app-header (toggleSidebarEvent)="toggleSidebar()"></app-header>
+    
+    <main class="content-body">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

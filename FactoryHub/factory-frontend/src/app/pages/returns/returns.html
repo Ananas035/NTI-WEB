@@ -1,0 +1,965 @@
+<div class="returns-container">
+
+  <!-- ========================= -->
+  <!-- Header -->
+  <!-- ========================= -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h1 class="title">
+        {{ 'ret_title' | translate }}
+      </h1>
+
+      <p class="subtitle">
+
+        {{ 'ret_total_returns' | translate }}:
+
+        <strong>
+          {{ returnsData.length }}
+        </strong>
+
+      </p>
+
+    </div>
+
+
+    <button
+      class="btn-amber"
+      type="button"
+      (click)="openAddModal()"
+      [disabled]="isLoadingFormData"
+    >
+
+      <span>
+
+        {{
+          isLoadingFormData
+            ? ('ret_loading_data' | translate)
+            : ('ret_add' | translate)
+        }}
+
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Error -->
+  <!-- ========================= -->
+
+  <div
+    class="alert-error"
+    *ngIf="errorMessage && !showModal"
+  >
+
+    {{ errorMessage | translate }}
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Search -->
+  <!-- ========================= -->
+
+  <div class="search-card">
+
+    <div class="search-wrapper">
+
+      <svg
+        class="search-icon"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+      >
+
+        <circle
+          cx="8.5"
+          cy="8.5"
+          r="5"
+          stroke-width="1.5"
+        />
+
+        <path
+          d="M13 13l3.5 3.5"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+
+      </svg>
+
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        [placeholder]="'ret_search_placeholder' | translate"
+        class="search-input"
+      />
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Returns Table -->
+  <!-- ========================= -->
+
+  <div class="table-card">
+
+    <div class="table-responsive">
+
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              {{ 'ret_number' | translate }}
+            </th>
+
+            <th>
+              {{ 'ret_customer' | translate }}
+            </th>
+
+            <th>
+              {{ 'ret_date' | translate }}
+            </th>
+
+            <th>
+              {{ 'ret_pieces' | translate }}
+            </th>
+
+            <th>
+              {{ 'ret_total_value' | translate }}
+            </th>
+
+            <th style="width: 70px;">
+              {{ 'ret_actions' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <!-- Loading -->
+
+          <tr
+            *ngIf="isLoadingReturns"
+          >
+
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+
+              {{ 'ret_loading_returns' | translate }}
+
+            </td>
+
+          </tr>
+
+
+          <!-- Data -->
+
+          <tr
+            *ngFor="
+              let ret of filteredReturns
+            "
+          >
+
+            <td class="mono-bold text-amber">
+
+              {{ ret.id }}
+
+            </td>
+
+
+            <td>
+
+              <div class="font-bold text-dark">
+
+                {{ ret.customerName }}
+
+              </div>
+
+              <div class="text-muted">
+
+                {{ ret.customerStore }}
+
+              </div>
+
+            </td>
+
+
+            <td class="text-muted">
+
+              {{ ret.date }}
+
+            </td>
+
+
+            <td class="font-bold">
+
+              {{
+                calculateTotalPieces(
+                  ret.items
+                ) | number
+              }}
+
+              {{ 'ret_piece' | translate }}
+
+            </td>
+
+
+            <td class="amount-cell">
+
+              {{ ret.amount | number }}
+
+              {{ 'ret_egp' | translate }}
+
+            </td>
+
+
+            <td>
+
+              <div class="actions-cell">
+
+                <!-- View -->
+
+                <button
+                  class="btn-icon view"
+                  type="button"
+                  (click)="openViewModal(ret)"
+                  [attr.title]="'ret_view_details' | translate"
+                  [attr.aria-label]="'ret_view_details' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+
+                    <path
+                      d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"
+                    />
+
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="3"
+                    />
+
+                  </svg>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty -->
+
+          <tr
+            *ngIf="
+              !isLoadingReturns &&
+              filteredReturns.length === 0
+            "
+          >
+
+            <td
+              colspan="6"
+              class="empty-state"
+            >
+
+              {{ 'ret_no_matching' | translate }}
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- Add Return Modal -->
+  <!-- ====================================================== -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="showModal"
+  >
+
+    <div class="modal-box return-modal">
+
+
+      <!-- Header -->
+
+      <div class="modal-header">
+
+        <div class="header-badge-title">
+
+          <div class="badge-icon-amber">
+
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <path
+                d="M4 7h9a4 4 0 0 1 0 8H7 M7 4 L4 7 L7 10"
+              />
+
+            </svg>
+
+          </div>
+
+
+          <h2>
+            {{ 'ret_create_title' | translate }}
+          </h2>
+
+        </div>
+
+
+        <button
+          class="btn-close"
+          type="button"
+          (click)="closeModal()"
+          [attr.aria-label]="'ret_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Body -->
+
+      <div class="modal-body">
+
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="errorMessage"
+        >
+
+          {{ errorMessage | translate }}
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Basic Data -->
+        <!-- ========================= -->
+
+        <div class="return-meta-grid">
+
+
+          <!-- Return Number -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'ret_return_number' | translate }}
+            </label>
+
+            <input
+              type="text"
+              [value]="formReturnId"
+              readonly
+              class="form-control disabled mono-bold"
+            />
+
+          </div>
+
+
+          <!-- Date -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'ret_return_date' | translate }}
+            </label>
+
+            <input
+              type="text"
+              [value]="formDate"
+              readonly
+              class="form-control disabled"
+            />
+
+          </div>
+
+
+          <!-- Customer -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'ret_customer_from' | translate }} *
+            </label>
+
+            <select
+              [(ngModel)]="formCustomerId"
+              class="form-control"
+            >
+
+              <option
+                [ngValue]="null"
+              >
+                {{ 'ret_customer' | translate }}
+              </option>
+
+              <option
+                *ngFor="let c of customers"
+                [ngValue]="c.id"
+              >
+
+                {{ c.name }} - ({{ c.store }})
+
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Items -->
+        <!-- ========================= -->
+
+        <div class="items-table-wrapper">
+
+          <table class="items-table">
+
+            <thead>
+
+              <tr>
+
+                <th style="width: 28%;">
+
+                  {{ 'ret_model_code' | translate }} *
+
+                </th>
+
+                <th>
+
+                  {{ 'ret_model_name' | translate }}
+
+                </th>
+
+                <th style="width: 14%;">
+
+                  {{ 'ret_quantity' | translate }} *
+
+                </th>
+
+                <th style="width: 18%;">
+
+                  {{ 'ret_unit_price' | translate }} *
+
+                </th>
+
+                <th style="width: 18%;">
+
+                  {{ 'ret_total' | translate }}
+
+                </th>
+
+                <th style="width: 40px;"></th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr
+                *ngFor="
+                  let item of formItems;
+                  trackBy: trackByItemId
+                "
+              >
+
+
+                <!-- Model -->
+
+                <td>
+
+                  <select
+                    [(ngModel)]="item.modelCode"
+                    (change)="onModelCodeChange(item)"
+                    class="table-control"
+                  >
+
+                    <option value="">
+
+                      {{ 'ret_select_model' | translate }}
+
+                    </option>
+
+
+                    <option
+                      *ngFor="let p of products"
+                      [value]="p.code"
+                    >
+
+                      {{ p.code }} -
+                      {{ p.name }}
+
+                      (
+
+                      {{ 'ret_available' | translate }}:
+
+                      {{ p.pieces }}
+
+                      )
+
+                    </option>
+
+                  </select>
+
+                </td>
+
+
+                <!-- Model Name -->
+
+                <td>
+
+                  <input
+                    type="text"
+                    [value]="
+                      item.modelName ||
+                      (
+                        ('ret_model_fallback' | translate)
+                        + ' '
+                        + item.modelCode
+                      )
+                    "
+                    [placeholder]="'ret_name' | translate"
+                    readonly
+                    class="table-control disabled"
+                  />
+
+                </td>
+
+
+                <!-- Quantity -->
+
+                <td>
+
+                  <input
+                    type="number"
+                    min="1"
+                    [(ngModel)]="item.quantity"
+                    (input)="recalculateItem(item)"
+                    class="table-control"
+                  />
+
+                </td>
+
+
+                <!-- Unit Price -->
+
+                <td>
+
+                  <input
+                    type="number"
+                    min="0"
+                    [(ngModel)]="item.unitPrice"
+                    (input)="recalculateItem(item)"
+                    class="table-control"
+                  />
+
+                </td>
+
+
+                <!-- Item Total -->
+
+                <td class="font-bold text-dark">
+
+                  {{ item.total | number }}
+
+                  {{ 'ret_egp' | translate }}
+
+                </td>
+
+
+                <!-- Delete Item -->
+
+                <td>
+
+                  <button
+                    class="btn-del-item"
+                    type="button"
+                    (click)="removeItem(item.id)"
+                    [attr.title]="'ret_delete_model' | translate"
+                    [attr.aria-label]="'ret_delete_model' | translate"
+                  >
+                    ×
+                  </button>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+
+          <!-- Add Model -->
+
+          <div class="add-item-row">
+
+            <button
+              class="btn-add-item-amber"
+              type="button"
+              (click)="addItem()"
+            >
+
+              {{ 'ret_add_model' | translate }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Total -->
+        <!-- ========================= -->
+
+        <div class="return-total-box">
+
+          <span class="total-label">
+
+            {{ 'ret_total_return_value' | translate }}
+
+          </span>
+
+          <span
+            class="total-value text-amber"
+          >
+
+            {{ totalReturnAmount | number }}
+
+            {{ 'ret_egp' | translate }}
+
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- Footer -->
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-amber"
+          type="button"
+          (click)="saveReturn()"
+          [disabled]="isSaving"
+        >
+
+          {{
+            isSaving
+              ? ('ret_saving' | translate)
+              : ('ret_save' | translate)
+          }}
+
+        </button>
+
+
+        <button
+          class="btn-secondary"
+          type="button"
+          (click)="closeModal()"
+          [disabled]="isSaving"
+        >
+
+          {{ 'ret_cancel' | translate }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- View Return Modal -->
+  <!-- ====================================================== -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="viewingReturn"
+  >
+
+    <div class="modal-box view-modal">
+
+
+      <!-- Header -->
+
+      <div class="modal-header">
+
+        <div class="header-badge-title">
+
+          <div class="badge-icon-amber">
+
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <path
+                d="M4 7h9a4 4 0 0 1 0 8H7 M7 4 L4 7 L7 10"
+              />
+
+            </svg>
+
+          </div>
+
+
+          <div>
+
+            <h2>
+
+              {{ 'ret_details_title' | translate }}
+
+              {{ viewingReturn.id }}
+
+            </h2>
+
+
+            <p class="header-sub">
+
+              {{ viewingReturn.date }}
+
+              •
+
+              {{ 'ret_customer_label' | translate }}
+
+              {{ viewingReturn.customerName }}
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="btn-close"
+          type="button"
+          (click)="closeViewModal()"
+          [attr.aria-label]="'ret_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Body -->
+
+      <div class="modal-body">
+
+
+        <!-- Loading -->
+
+        <div
+          class="alert-error"
+          *ngIf="viewLoading"
+        >
+
+          {{ 'ret_latest_loading' | translate }}
+
+        </div>
+
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="viewErrorMessage"
+        >
+
+          {{ viewErrorMessage | translate }}
+
+        </div>
+
+
+        <!-- Items -->
+
+        <table class="data-table small">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                {{ 'ret_model_name' | translate }}
+              </th>
+
+              <th>
+                {{ 'ret_model_code' | translate }}
+              </th>
+
+              <th>
+                {{ 'ret_quantity' | translate }}
+              </th>
+
+              <th>
+                {{ 'ret_unit_price' | translate }}
+              </th>
+
+              <th>
+                {{ 'ret_total' | translate }}
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let item of viewingReturn.items
+              "
+            >
+
+              <td class="font-bold">
+
+                {{
+                  item.modelName ||
+                  (
+                    ('ret_model_fallback' | translate)
+                    + ' '
+                    + item.modelCode
+                  )
+                }}
+
+              </td>
+
+
+              <td class="mono-bold text-amber">
+
+                {{ item.modelCode }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.quantity }}
+
+                {{ 'ret_piece' | translate }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.unitPrice | number }}
+
+                {{ 'ret_egp' | translate }}
+
+              </td>
+
+
+              <td class="font-bold">
+
+                {{ item.total | number }}
+
+                {{ 'ret_egp' | translate }}
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+
+        <!-- Total -->
+
+        <div class="view-total-wrap">
+
+          <span>
+
+            {{ 'ret_total_return' | translate }}
+
+          </span>
+
+
+          <strong class="text-amber">
+
+            {{ viewingReturn.amount | number }}
+
+            {{ 'ret_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- Footer -->
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-secondary full-width"
+          type="button"
+          (click)="closeViewModal()"
+        >
+
+          {{ 'ret_close' | translate }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

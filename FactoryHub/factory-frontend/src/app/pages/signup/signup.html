@@ -1,0 +1,499 @@
+<div class="auth-container">
+
+  <div class="auth-card">
+
+    <!-- ========================= -->
+    <!-- Header -->
+    <!-- ========================= -->
+
+    <div class="auth-header-dark">
+
+      <!-- Language Switcher -->
+
+      <div class="language-switcher">
+
+        <button
+          type="button"
+          class="language-toggle"
+          (click)="toggleLanguage()"
+          [attr.title]="
+            language.currentLang === 'ar'
+              ? ('signup_switch_to_english' | translate)
+              : ('signup_switch_to_arabic' | translate)
+          "
+        >
+          {{
+            language.currentLang === 'ar'
+              ? 'EN'
+              : 'ع'
+          }}
+        </button>
+
+      </div>
+
+
+      <div class="logo-box">
+
+        <svg
+          viewBox="0 0 40 40"
+          fill="none"
+          class="logo-icon"
+        >
+
+          <rect
+            width="40"
+            height="40"
+            rx="10"
+            fill="#2563eb"
+          />
+
+          <path
+            d="M8 28 Q14 20 20 22 Q26 24 32 16"
+            stroke="white"
+            stroke-width="2.2"
+            fill="none"
+            stroke-linecap="round"
+          />
+
+          <circle
+            cx="20"
+            cy="22"
+            r="2.5"
+            fill="white"
+          />
+
+          <path
+            d="M20 22 L20 30"
+            stroke="white"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          />
+
+          <path
+            d="M16 30 L24 30"
+            stroke="white"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          />
+
+          <circle
+            cx="10"
+            cy="26"
+            r="2.5"
+            fill="#93c5fd"
+          />
+
+          <path
+            d="M10 26 L10 14 Q10 12 12 12 L14 12"
+            stroke="#93c5fd"
+            stroke-width="1.5"
+            fill="none"
+            stroke-linecap="round"
+          />
+
+        </svg>
+
+      </div>
+
+
+      <h1 class="brand-title">
+        FactoryHub
+      </h1>
+
+      <p class="brand-subtitle">
+        {{ 'signup_brand_subtitle' | translate }}
+      </p>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- Body -->
+    <!-- ========================= -->
+
+    <div class="auth-body">
+
+      <h2 class="form-title">
+        {{ 'signup_title' | translate }}
+      </h2>
+
+
+      <form
+        (ngSubmit)="onSignup()"
+        class="auth-form"
+      >
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="errorMessage"
+        >
+          {{ errorMessage | translate }}
+        </div>
+
+
+        <!-- Success -->
+
+        <div
+          class="alert-success"
+          *ngIf="successMessage"
+        >
+          {{ successMessage | translate }}
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Username -->
+        <!-- ========================= -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'signup_username' | translate }}
+          </label>
+
+          <div class="input-wrapper">
+
+            <input
+              type="text"
+              [(ngModel)]="username"
+              name="username"
+              [placeholder]="
+                'signup_username_placeholder'
+                  | translate
+              "
+              class="form-control with-icon-right"
+            />
+
+            <svg
+              class="field-icon-right"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <path
+                d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-7 9a7 7 0 1 1 14 0H3z"
+              />
+
+            </svg>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Email -->
+        <!-- ========================= -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'signup_email' | translate }}
+          </label>
+
+          <div class="input-wrapper">
+
+            <input
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              [placeholder]="
+                'signup_email_placeholder'
+                  | translate
+              "
+              class="form-control with-icon-right"
+              dir="ltr"
+            />
+
+            <svg
+              class="field-icon-right"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <path
+                d="M3 4h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"
+              />
+
+              <path
+                d="m3 5 7 5 7-5"
+              />
+
+            </svg>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Mobile -->
+        <!-- ========================= -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'signup_mobile' | translate }}
+          </label>
+
+          <div class="input-wrapper">
+
+            <input
+              type="tel"
+              [(ngModel)]="mobile"
+              name="mobile"
+              [placeholder]="
+                'signup_mobile_placeholder'
+                  | translate
+              "
+              class="form-control with-icon-right"
+              dir="ltr"
+            />
+
+            <svg
+              class="field-icon-right"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <path
+                d="M2 3a1 1 0 0 1 1-1h2.153a1 1 0 0 1 .986.836l.74 4.435a1 1 0 0 1-.54 1.06l-1.548.773a11.037 11.037 0 0 0 6.105 6.105l.774-1.548a1 1 0 0 1 1.059-.54l4.435.74a1 1 0 0 1 .836.986V17a1 1 0 0 1-1 1h-2C7.82 18 2 12.18 2 5V3z"
+              />
+
+            </svg>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Password -->
+        <!-- ========================= -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'signup_password' | translate }}
+          </label>
+
+          <div class="input-wrapper">
+
+            <input
+              [type]="
+                showPassword
+                  ? 'text'
+                  : 'password'
+              "
+              [(ngModel)]="password"
+              name="password"
+              [placeholder]="
+                'signup_password_placeholder'
+                  | translate
+              "
+              class="form-control with-icon-right password-padding"
+              dir="ltr"
+            />
+
+            <svg
+              class="field-icon-right"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <rect
+                x="3"
+                y="10"
+                width="14"
+                height="8"
+                rx="2"
+              />
+
+              <path
+                d="M7 10V7a3 3 0 0 1 6 0v3"
+              />
+
+            </svg>
+
+
+            <!-- Show / Hide Password -->
+
+            <button
+              type="button"
+              class="btn-toggle-pw"
+              (click)="togglePassword()"
+              [attr.title]="
+                showPassword
+                  ? ('signup_hide_password' | translate)
+                  : ('signup_show_password' | translate)
+              "
+            >
+
+              <svg
+                *ngIf="!showPassword"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="eye-icon"
+              >
+
+                <path
+                  d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                />
+
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="3"
+                />
+
+              </svg>
+
+
+              <svg
+                *ngIf="showPassword"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="eye-icon"
+              >
+
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                />
+
+                <line
+                  x1="1"
+                  y1="1"
+                  x2="23"
+                  y2="23"
+                />
+
+              </svg>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Confirm Password -->
+        <!-- ========================= -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'signup_confirm_password' | translate }}
+          </label>
+
+          <div class="input-wrapper">
+
+            <input
+              type="password"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              [placeholder]="
+                'signup_confirm_password_placeholder'
+                  | translate
+              "
+              class="form-control with-icon-right"
+              dir="ltr"
+            />
+
+            <svg
+              class="field-icon-right"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+
+              <rect
+                x="3"
+                y="10"
+                width="14"
+                height="8"
+                rx="2"
+              />
+
+              <path
+                d="M7 10V7a3 3 0 0 1 6 0v3"
+              />
+
+            </svg>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Submit -->
+        <!-- ========================= -->
+
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="isLoading"
+        >
+
+          {{
+            isLoading
+              ? ('signup_loading' | translate)
+              : ('signup_submit' | translate)
+          }}
+
+        </button>
+
+      </form>
+
+
+      <!-- ========================= -->
+      <!-- Footer -->
+      <!-- ========================= -->
+
+      <div class="auth-card-footer">
+
+        <span>
+          {{ 'signup_have_account' | translate }}
+        </span>
+
+        <a
+          routerLink="/login"
+          class="signup-link"
+        >
+          {{ 'signup_login' | translate }}
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Page Footer -->
+  <!-- ========================= -->
+
+  <div class="auth-page-footer">
+
+    {{ 'signup_footer' | translate }}
+
+  </div>
+
+</div>

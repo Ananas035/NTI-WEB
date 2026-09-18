@@ -1,0 +1,1140 @@
+<div
+  class="invoices-container"
+  [class.is-printing]="printableInvoice"
+>
+
+  <!-- ========================= -->
+  <!-- Header -->
+  <!-- ========================= -->
+
+  <div class="page-header print-hide">
+
+    <div>
+
+      <h1 class="title">
+        {{ 'inv_title' | translate }}
+      </h1>
+
+      <p class="subtitle">
+
+        {{ 'inv_total_issued' | translate }}:
+
+        <strong>
+          {{ invoices.length }}
+        </strong>
+
+      </p>
+
+    </div>
+
+    <button
+      class="btn-primary"
+      type="button"
+      (click)="openCreateInvoice()"
+      [disabled]="isLoadingFormData"
+    >
+
+      <span>
+
+        {{
+          isLoadingFormData
+            ? ('inv_loading_data' | translate)
+            : ('inv_create' | translate)
+        }}
+
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Error -->
+  <!-- ========================= -->
+
+  <div
+    class="alert-error print-hide"
+    *ngIf="errorMessage"
+  >
+
+    {{ errorMessage | translate }}
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Search -->
+  <!-- ========================= -->
+
+  <div class="search-card print-hide">
+
+    <div class="search-wrapper">
+
+      <svg
+        class="search-icon"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+      >
+
+        <circle
+          cx="8.5"
+          cy="8.5"
+          r="5"
+          stroke-width="1.5"
+        />
+
+        <path
+          d="M13 13l3.5 3.5"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+
+      </svg>
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        [placeholder]="'inv_search_placeholder' | translate"
+        class="search-input"
+      />
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Invoice Table -->
+  <!-- ========================= -->
+
+  <div class="table-card print-hide">
+
+    <div class="table-responsive">
+
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              {{ 'inv_invoice_number' | translate }}
+            </th>
+
+            <th>
+              {{ 'inv_customer' | translate }}
+            </th>
+
+            <th>
+              {{ 'inv_date' | translate }}
+            </th>
+
+            <th>
+              {{ 'inv_total_amount' | translate }}
+            </th>
+
+            <th style="width: 110px;">
+              {{ 'inv_actions' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <!-- Loading -->
+
+          <tr *ngIf="isLoadingInvoices">
+
+            <td
+              colspan="5"
+              class="empty-state"
+            >
+
+              {{ 'inv_loading_invoices' | translate }}
+
+            </td>
+
+          </tr>
+
+
+          <!-- Data -->
+
+          <tr
+            *ngFor="let inv of filteredInvoices"
+          >
+
+            <td class="mono-bold text-blue">
+              {{ inv.id }}
+            </td>
+
+            <td>
+
+              <div class="font-bold">
+                {{ inv.customerName }}
+              </div>
+
+              <div class="text-muted">
+                {{ inv.customerStore }}
+              </div>
+
+            </td>
+
+            <td class="text-muted">
+              {{ inv.date }}
+            </td>
+
+            <td class="amount-cell">
+
+              {{ inv.amount | number }}
+
+              {{ 'inv_egp' | translate }}
+
+            </td>
+
+            <td>
+
+              <div class="actions-cell">
+
+                <!-- View -->
+
+                <button
+                  class="btn-icon view"
+                  type="button"
+                  (click)="openViewModal(inv)"
+                  [attr.title]="'inv_view_details' | translate"
+                  [attr.aria-label]="'inv_view_details' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+
+                    <path
+                      d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"
+                    />
+
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="3"
+                    />
+
+                  </svg>
+
+                </button>
+
+
+                <!-- Print -->
+
+                <button
+                  class="btn-icon print"
+                  type="button"
+                  (click)="printInvoice(inv)"
+                  [attr.title]="'inv_print_pdf' | translate"
+                  [attr.aria-label]="'inv_print_pdf' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+
+                    <path
+                      d="M5 6V3h10v3M5 14v3h10v-3M3 10h14v5H3zM7 10h.01"
+                    />
+
+                  </svg>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty -->
+
+          <tr
+            *ngIf="
+              !isLoadingInvoices &&
+              filteredInvoices.length === 0
+            "
+          >
+
+            <td
+              colspan="5"
+              class="empty-state"
+            >
+
+              {{ 'inv_no_matching' | translate }}
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- Create Invoice Modal -->
+  <!-- ====================================================== -->
+
+  <div
+    class="modal-backdrop print-hide"
+    *ngIf="showCreateModal"
+  >
+
+    <div class="modal-box invoice-modal">
+
+
+      <!-- Header -->
+
+      <div class="modal-header">
+
+        <h2>
+          {{ 'inv_create_title' | translate }}
+        </h2>
+
+        <button
+          class="btn-close"
+          type="button"
+          (click)="closeCreateModal()"
+          [attr.aria-label]="'inv_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Body -->
+
+      <div class="modal-body">
+
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="stockErrorMsg"
+        >
+
+          {{ stockErrorMsg | translate }}
+
+        </div>
+
+
+        <!-- Meta -->
+
+        <div class="invoice-meta-grid">
+
+
+          <!-- Invoice Number -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'inv_invoice_number' | translate }}
+            </label>
+
+            <input
+              type="text"
+              [value]="generatedInvoiceId"
+              readonly
+              class="form-control disabled mono-bold"
+            />
+
+          </div>
+
+
+          <!-- Date -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'inv_invoice_date' | translate }}
+            </label>
+
+            <input
+              type="text"
+              [value]="invoiceDate"
+              readonly
+              class="form-control disabled"
+            />
+
+          </div>
+
+
+          <!-- Customer -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'inv_customer_receiver' | translate }} *
+            </label>
+
+            <select
+              [(ngModel)]="selectedCustomerId"
+              class="form-control"
+            >
+
+              <option
+                [ngValue]="null"
+              >
+                {{ 'inv_select_customer' | translate }}
+              </option>
+
+              <option
+                *ngFor="let c of customers"
+                [ngValue]="c.id"
+              >
+
+                {{ c.name }} - ({{ c.store }})
+
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Items -->
+        <!-- ========================= -->
+
+        <div class="items-table-wrapper">
+
+          <table class="items-table">
+
+            <thead>
+
+              <tr>
+
+                <th style="width: 28%;">
+                  {{ 'inv_model_code' | translate }} *
+                </th>
+
+                <th>
+                  {{ 'inv_model_name' | translate }}
+                </th>
+
+                <th style="width: 14%;">
+                  {{ 'inv_quantity' | translate }} *
+                </th>
+
+                <th style="width: 18%;">
+                  {{ 'inv_unit_price' | translate }} *
+                </th>
+
+                <th style="width: 18%;">
+                  {{ 'inv_total' | translate }}
+                </th>
+
+                <th style="width: 40px;"></th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr
+                *ngFor="
+                  let item of invoiceItems;
+                  trackBy: trackByItemId
+                "
+              >
+
+
+                <!-- Product -->
+
+                <td>
+
+                  <select
+                    [(ngModel)]="item.modelCode"
+                    (change)="onModelCodeChange(item)"
+                    class="table-control"
+                  >
+
+                    <option value="">
+
+                      {{ 'inv_select_model' | translate }}
+
+                    </option>
+
+                    <option
+                      *ngFor="let p of products"
+                      [value]="p.code"
+                    >
+
+                      {{ p.code }} -
+                      {{ p.name }}
+
+                      (
+                      {{ 'inv_available' | translate }}:
+                      {{ p.pieces }}
+                      )
+
+                    </option>
+
+                  </select>
+
+                </td>
+
+
+                <!-- Product Name -->
+
+                <td>
+
+                  <input
+                    type="text"
+                    [value]="
+                      item.modelName ||
+                      (
+                        ('inv_model_fallback' | translate) +
+                        ' ' +
+                        item.modelCode
+                      )
+                    "
+                    [placeholder]="'inv_name' | translate"
+                    readonly
+                    class="table-control disabled"
+                  />
+
+                </td>
+
+
+                <!-- Quantity -->
+
+                <td>
+
+                  <input
+                    type="number"
+                    min="1"
+                    [(ngModel)]="item.quantity"
+                    (input)="recalculateItem(item)"
+                    class="table-control"
+                  />
+
+                </td>
+
+
+                <!-- Price -->
+
+                <td>
+
+                  <input
+                    type="number"
+                    min="0"
+                    [(ngModel)]="item.unitPrice"
+                    (input)="recalculateItem(item)"
+                    class="table-control"
+                  />
+
+                </td>
+
+
+                <!-- Total -->
+
+                <td class="font-bold text-dark">
+
+                  {{ item.total | number }}
+
+                  {{ 'inv_egp' | translate }}
+
+                </td>
+
+
+                <!-- Delete -->
+
+                <td>
+
+                  <button
+                    class="btn-del-item"
+                    type="button"
+                    (click)="removeInvoiceItem(item.id)"
+                    [attr.title]="'inv_delete_item' | translate"
+                    [attr.aria-label]="'inv_delete_item' | translate"
+                  >
+                    ×
+                  </button>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+
+          <!-- Add Item -->
+
+          <div class="add-item-row">
+
+            <button
+              class="btn-add-item"
+              type="button"
+              (click)="addInvoiceItem()"
+            >
+
+              {{ 'inv_add_model' | translate }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Total -->
+        <!-- ========================= -->
+
+        <div class="invoice-total-box">
+
+          <span class="total-label">
+            {{ 'inv_required_total' | translate }}
+          </span>
+
+          <span class="total-value">
+
+            {{ totalInvoiceAmount | number }}
+
+            {{ 'inv_egp' | translate }}
+
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- Footer -->
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-primary"
+          type="button"
+          (click)="saveInvoice(false)"
+          [disabled]="isSaving"
+        >
+
+          {{
+            isSaving
+              ? ('inv_saving' | translate)
+              : ('inv_save' | translate)
+          }}
+
+        </button>
+
+
+        <button
+          class="btn-dark"
+          type="button"
+          (click)="saveInvoice(true)"
+          [disabled]="isSaving"
+        >
+
+          {{ 'inv_save_print' | translate }}
+
+        </button>
+
+
+        <button
+          class="btn-secondary"
+          type="button"
+          (click)="closeCreateModal()"
+          [disabled]="isSaving"
+        >
+
+          {{ 'inv_cancel' | translate }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- View Invoice Modal -->
+  <!-- ====================================================== -->
+
+  <div
+    class="modal-backdrop print-hide"
+    *ngIf="viewingInvoice"
+  >
+
+    <div class="modal-box view-modal">
+
+
+      <!-- Header -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+
+            {{ 'inv_details_title' | translate }}
+
+            {{ viewingInvoice.id }}
+
+          </h2>
+
+          <p class="header-sub">
+
+            {{ viewingInvoice.date }}
+
+            •
+
+            {{ 'inv_customer_label' | translate }}
+
+            {{ viewingInvoice.customerName }}
+
+          </p>
+
+        </div>
+
+
+        <button
+          class="btn-close"
+          type="button"
+          (click)="closeViewModal()"
+          [attr.aria-label]="'inv_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Body -->
+
+      <div class="modal-body">
+
+
+        <!-- Loading -->
+
+        <div
+          class="alert-error"
+          *ngIf="viewLoading"
+        >
+
+          {{ 'inv_latest_loading' | translate }}
+
+        </div>
+
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="viewErrorMessage"
+        >
+
+          {{ viewErrorMessage | translate }}
+
+        </div>
+
+
+        <!-- Details -->
+
+        <table class="data-table small">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                {{ 'inv_model_name' | translate }}
+              </th>
+
+              <th>
+                {{ 'inv_model_code' | translate }}
+              </th>
+
+              <th>
+                {{ 'inv_quantity' | translate }}
+              </th>
+
+              <th>
+                {{ 'inv_unit_price' | translate }}
+              </th>
+
+              <th>
+                {{ 'inv_total' | translate }}
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let item of viewingInvoice.items
+              "
+            >
+
+              <td class="font-bold">
+
+                {{
+                  item.modelName ||
+                  (
+                    ('inv_model_fallback' | translate) +
+                    ' ' +
+                    item.modelCode
+                  )
+                }}
+
+              </td>
+
+              <td class="mono-bold text-blue">
+
+                {{ item.modelCode }}
+
+              </td>
+
+              <td>
+
+                {{ item.quantity }}
+
+                {{ 'inv_quantity_pieces' | translate }}
+
+              </td>
+
+              <td>
+
+                {{ item.unitPrice | number }}
+
+                {{ 'inv_egp' | translate }}
+
+              </td>
+
+              <td class="font-bold">
+
+                {{ item.total | number }}
+
+                {{ 'inv_egp' | translate }}
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+
+        <!-- Total -->
+
+        <div class="view-total-wrap">
+
+          <span>
+            {{ 'inv_total_value' | translate }}
+          </span>
+
+          <strong>
+
+            {{ viewingInvoice.amount | number }}
+
+            {{ 'inv_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- Footer -->
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-dark"
+          type="button"
+          (click)="printInvoice(viewingInvoice)"
+        >
+
+          {{ 'inv_print_invoice' | translate }}
+
+        </button>
+
+        <button
+          class="btn-secondary"
+          type="button"
+          (click)="closeViewModal()"
+        >
+
+          {{ 'inv_close' | translate }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- Print Container -->
+  <!-- ====================================================== -->
+
+  <div
+    class="print-container"
+    *ngIf="printableInvoice"
+  >
+
+    <div class="invoice-paper">
+
+
+      <!-- Header -->
+
+      <div class="inv-header">
+
+        <div class="inv-header-right">
+
+          <h1 class="brand-title">
+            FactoryHub
+          </h1>
+
+          <p class="brand-sub">
+            مصنع الأصالة للملابس والنسيج
+          </p>
+
+          <p class="brand-sub">
+            القاهرة - المنطقة الصناعية
+          </p>
+
+        </div>
+
+
+        <div class="inv-header-left">
+
+          <h2 class="invoice-type-title">
+            {{ 'inv_print_sale' | translate }}
+          </h2>
+
+          <p class="meta-row">
+
+            <span>
+              {{ 'inv_invoice_no' | translate }}
+            </span>
+
+            <strong>
+              {{ printableInvoice.id }}
+            </strong>
+
+          </p>
+
+          <p class="meta-row">
+
+            <span>
+              {{ 'inv_print_date' | translate }}
+            </span>
+
+            <strong>
+              {{ printableInvoice.date }}
+            </strong>
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="inv-divider"></div>
+
+
+      <!-- Customer -->
+
+      <div class="inv-customer-box">
+
+        <span>
+          {{ 'inv_bill_to' | translate }}
+        </span>
+
+        <strong>
+          {{ printableInvoice.customerName }}
+        </strong>
+
+      </div>
+
+
+      <!-- Items -->
+
+      <table class="inv-items-table">
+
+        <thead>
+
+          <tr>
+
+            <th style="width: 45px;">
+              {{ 'inv_item_number' | translate }}
+            </th>
+
+            <th style="width: 130px;">
+              {{ 'inv_model_code_print' | translate }}
+            </th>
+
+            <th>
+              {{ 'inv_model_name_print' | translate }}
+            </th>
+
+            <th style="width: 120px;">
+              {{ 'inv_quantity' | translate }}
+            </th>
+
+            <th style="width: 120px;">
+              {{ 'inv_unit_price_print' | translate }}
+            </th>
+
+            <th style="width: 130px;">
+              {{ 'inv_total_print' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let it of printableInvoice.items;
+              let idx = index
+            "
+          >
+
+            <td class="text-center">
+              {{ idx + 1 }}
+            </td>
+
+            <td class="mono-code">
+              {{ it.modelCode }}
+            </td>
+
+            <td class="font-semibold">
+
+              {{
+                it.modelName ||
+                (
+                  ('inv_model_fallback' | translate) +
+                  ' ' +
+                  it.modelCode
+                )
+              }}
+
+            </td>
+
+            <td>
+
+              {{ it.quantity }}
+
+              {{ 'inv_quantity_pieces' | translate }}
+
+            </td>
+
+            <td>
+
+              {{ it.unitPrice | number }}
+
+              {{ 'inv_egp' | translate }}
+
+            </td>
+
+            <td class="font-bold">
+
+              {{ it.total | number }}
+
+              {{ 'inv_egp' | translate }}
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+
+      <!-- Footer -->
+
+      <div class="inv-footer-wrap">
+
+        <div class="inv-total-card">
+
+          <span class="total-caption">
+            {{ 'inv_required_amount' | translate }}
+          </span>
+
+          <strong class="total-num">
+
+            {{ printableInvoice.amount | number }}
+
+            {{ 'inv_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="inv-signatures">
+
+          <p>
+
+            {{ 'inv_receiver_signature' | translate }}
+
+            ...............................
+
+          </p>
+
+          <p>
+
+            {{ 'inv_accounts_signature' | translate }}
+
+            ...............................
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

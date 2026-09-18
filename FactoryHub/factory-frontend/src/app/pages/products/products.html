@@ -1,0 +1,753 @@
+<div class="products-container">
+
+  <!-- ========================================================= -->
+  <!-- PAGE HEADER -->
+  <!-- ========================================================= -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h1 class="title">
+        {{ 'prd_title' | translate }}
+      </h1>
+
+      <p class="subtitle">
+
+        {{ 'prd_total_models' | translate }}:
+
+        <strong>
+          {{ models.length }}
+        </strong>
+
+      </p>
+
+    </div>
+
+
+    <button
+      class="btn-primary"
+      type="button"
+      (click)="openAddModal()"
+    >
+
+      <span>
+        {{ 'prd_add' | translate }}
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- SEARCH -->
+  <!-- ========================================================= -->
+
+  <div class="search-card">
+
+    <div class="search-input-wrapper">
+
+      <svg
+        class="search-icon"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+      >
+
+        <circle
+          cx="8.5"
+          cy="8.5"
+          r="5"
+          stroke-width="1.5"
+        />
+
+        <path
+          d="M13 13l3.5 3.5"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+
+      </svg>
+
+
+      <input
+        type="text"
+        [placeholder]="'prd_search_placeholder' | translate"
+        [(ngModel)]="searchTerm"
+        class="search-input"
+      />
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- PRODUCTS TABLE -->
+  <!-- ========================================================= -->
+
+  <div class="table-card">
+
+    <div class="table-responsive">
+
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+
+            <th style="width: 70px;">
+              {{ 'prd_image' | translate }}
+            </th>
+
+            <th>
+              {{ 'prd_model_name' | translate }}
+            </th>
+
+            <th>
+              {{ 'prd_code' | translate }}
+            </th>
+
+            <th>
+              {{ 'prd_pieces' | translate }}
+            </th>
+
+            <th>
+              {{ 'prd_price' | translate }}
+            </th>
+
+            <th>
+              {{ 'prd_colors' | translate }}
+            </th>
+
+            <th style="width: 100px;">
+              {{ 'prd_actions' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let m of filteredModels"
+          >
+
+            <!-- Image -->
+
+            <td>
+
+              <div class="thumb-box">
+
+                <img
+                  *ngIf="m.image"
+                  [src]="getImageUrl(m.image)"
+                  [alt]="m.name"
+                  class="thumb-img"
+                />
+
+
+                <span
+                  *ngIf="!m.image"
+                  class="no-img"
+                >
+                  {{ 'prd_no_image' | translate }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- Name / Date -->
+
+            <td>
+
+              <div class="model-meta">
+
+                <span class="model-name">
+                  {{ m.name }}
+                </span>
+
+                <span class="model-date">
+                  {{ m.createdAt }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- Code -->
+
+            <td>
+
+              <span class="code-badge">
+                #{{ m.code }}
+              </span>
+
+            </td>
+
+
+            <!-- Pieces -->
+
+            <td class="pieces-cell">
+
+              {{ m.pieces | number }}
+
+            </td>
+
+
+            <!-- Price -->
+
+            <td class="price-cell">
+
+              {{
+                m.price
+                  ? (m.price | number)
+                  : '—'
+              }}
+
+              <span>
+                {{ 'currency' | translate }}
+              </span>
+
+            </td>
+
+
+            <!-- Colors -->
+
+            <td>
+
+              <div class="colors-wrap">
+
+                <span
+                  class="color-tag"
+                  *ngFor="
+                    let color of m.colors;
+                    trackBy: trackByIndex
+                  "
+                >
+
+                  {{ color }}
+
+                </span>
+
+
+                <span
+                  class="color-tag"
+                  *ngIf="
+                    !m.colors ||
+                    m.colors.length === 0
+                  "
+                >
+                  —
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- Actions -->
+
+            <td>
+
+              <div class="actions-cell">
+
+                <!-- Edit -->
+
+                <button
+                  type="button"
+                  class="btn-icon edit"
+                  (click)="openEditModal(m)"
+                  [attr.title]="'prd_edit' | translate"
+                  [attr.aria-label]="'prd_edit' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+
+                    <path
+                      d="M13.5 3.5a2.12 2.12 0 0 1 3 3L7 16l-4 1 1-4 9.5-9.5Z"
+                    />
+
+                  </svg>
+
+                </button>
+
+
+                <!-- Delete -->
+
+                <button
+                  type="button"
+                  class="btn-icon delete"
+                  (click)="openDeleteConfirm(m.id)"
+                  [attr.title]="'prd_delete' | translate"
+                  [attr.aria-label]="'prd_delete' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+
+                    <path
+                      d="M3 5h14M8 5V3h4v2M6 5l1 12h6l1-12"
+                    />
+
+                  </svg>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty -->
+
+          <tr
+            *ngIf="filteredModels.length === 0"
+          >
+
+            <td
+              colspan="7"
+              class="empty-state"
+            >
+
+              {{ 'prd_no_matching' | translate }}
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- ADD / EDIT MODEL MODAL -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="showModal"
+  >
+
+    <div class="modal-box">
+
+
+      <!-- Header -->
+
+      <div class="modal-header">
+
+        <h2>
+
+          {{
+            isEditing
+              ? ('prd_edit_title' | translate)
+              : ('prd_add_title' | translate)
+          }}
+
+        </h2>
+
+
+        <button
+          type="button"
+          class="btn-close"
+          (click)="closeModal()"
+          [attr.aria-label]="'prd_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Body -->
+
+      <div class="modal-body">
+
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="errorMessage"
+        >
+
+          {{ errorMessage | translate }}
+
+        </div>
+
+
+        <!-- Image -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'prd_model_image' | translate }}
+          </label>
+
+
+          <div class="image-uploader">
+
+
+            <!-- Preview -->
+
+            <div
+              *ngIf="formImage"
+              class="image-preview"
+            >
+
+              <img
+                [src]="formImage"
+                [alt]="'prd_image_preview' | translate"
+              />
+
+
+              <button
+                type="button"
+                class="btn-remove-img"
+                (click)="removeImage()"
+              >
+
+                {{ 'prd_remove_image' | translate }}
+
+              </button>
+
+            </div>
+
+
+            <!-- Upload -->
+
+            <label
+              *ngIf="!formImage"
+              class="upload-dropzone"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                class="upload-icon"
+              >
+
+                <path
+                  d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"
+                />
+
+              </svg>
+
+
+              <span>
+                {{ 'prd_choose_image' | translate }}
+              </span>
+
+
+              <input
+                type="file"
+                (change)="onFileSelected($event)"
+                accept="image/*"
+                hidden
+              />
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <!-- Model Name -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'prd_name_label' | translate }} *
+          </label>
+
+
+          <input
+            type="text"
+            [(ngModel)]="formName"
+            [placeholder]="'prd_name_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Code / Pieces / Price -->
+
+        <div class="form-grid-3">
+
+
+          <!-- Code -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'prd_code_label' | translate }} *
+            </label>
+
+
+            <input
+              type="text"
+              [(ngModel)]="formCode"
+              [placeholder]="'prd_code_placeholder' | translate"
+              class="form-control"
+            />
+
+          </div>
+
+
+          <!-- Pieces -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'prd_pieces_label' | translate }} *
+            </label>
+
+
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="formPieces"
+              [placeholder]="'prd_pieces_placeholder' | translate"
+              class="form-control"
+            />
+
+          </div>
+
+
+          <!-- Price -->
+
+          <div class="form-group">
+
+            <label>
+              {{ 'prd_price_label' | translate }} *
+            </label>
+
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="formPrice"
+              [placeholder]="'prd_price_placeholder' | translate"
+              class="form-control"
+            />
+
+          </div>
+
+        </div>
+
+
+        <!-- Number Of Colors -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'prd_num_colors_label' | translate }}
+          </label>
+
+
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="formNumColors"
+            (input)="onNumColorsChange()"
+            [placeholder]="'prd_num_colors_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Color Inputs -->
+
+        <div
+          class="colors-inputs-box"
+          *ngIf="formColors.length > 0"
+        >
+
+          <p class="box-hint">
+
+            {{ 'prd_colors_hint' | translate }}
+
+          </p>
+
+
+          <div class="colors-fields-grid">
+
+            <div
+              class="color-input-item"
+              *ngFor="
+                let color of formColors;
+                let i = index;
+                trackBy: trackByIndex
+              "
+            >
+
+              <span class="color-index">
+                {{ i + 1 }}
+              </span>
+
+
+              <input
+                type="text"
+                [value]="formColors[i]"
+                (input)="onColorInput(i, $event)"
+                [placeholder]="
+                  ('prd_color_placeholder' | translate)
+                  + ' '
+                  + (i + 1)
+                "
+                class="form-control"
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Footer -->
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="saveModel()"
+          [disabled]="isSaving"
+        >
+
+          {{
+            isEditing
+              ? ('prd_save_changes' | translate)
+              : ('prd_add_model' | translate)
+          }}
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="closeModal()"
+          [disabled]="isSaving"
+        >
+
+          {{ 'prd_cancel' | translate }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- DELETE CONFIRMATION -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="showDeleteModal"
+  >
+
+    <div class="modal-box delete-box">
+
+
+      <!-- Icon -->
+
+      <div class="delete-icon-wrap">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="delete-svg"
+        >
+
+          <path
+            d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          />
+
+        </svg>
+
+      </div>
+
+
+      <!-- Title -->
+
+      <h3>
+        {{ 'prd_confirm_delete_title' | translate }}
+      </h3>
+
+
+      <!-- Message -->
+
+      <p>
+        {{ 'prd_confirm_delete_text' | translate }}
+      </p>
+
+
+      <!-- Footer -->
+
+      <div class="modal-footer delete-footer">
+
+        <button
+          type="button"
+          class="btn-danger"
+          (click)="confirmDelete()"
+        >
+
+          {{ 'prd_confirm_delete' | translate }}
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="cancelDelete()"
+        >
+
+          {{ 'prd_cancel' | translate }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

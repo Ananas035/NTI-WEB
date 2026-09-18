@@ -1,0 +1,463 @@
+<div class="dashboard-container">
+
+  <!-- Welcome -->
+  <div class="welcome-header">
+    <h1 class="page-title">
+      {{ 'dash_welcome' | translate }}
+    </h1>
+
+    <p class="page-subtitle">
+      {{ 'dash_subtitle' | translate }}
+    </p>
+  </div>
+
+
+  <!-- Loading -->
+  <div
+    class="dashboard-loading"
+    *ngIf="isLoading"
+  >
+    {{ 'dashboard_loading' | translate }}
+  </div>
+
+
+  <!-- Error -->
+  <div
+    class="dashboard-error"
+    *ngIf="errorMessage"
+  >
+    {{ errorMessage }}
+  </div>
+
+
+  <!-- Statistics -->
+  <div class="stats-grid">
+
+    <div
+      class="stat-card"
+      *ngFor="let s of stats"
+    >
+
+      <div
+        class="stat-icon"
+        [ngClass]="s.type"
+      >
+
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="stat-svg"
+        >
+          <path [attr.d]="s.icon" />
+        </svg>
+
+      </div>
+
+
+      <div class="stat-content">
+
+        <span class="stat-title">
+          {{ s.titleKey | translate }}
+        </span>
+
+        <span class="stat-value">
+          {{ s.value }}
+        </span>
+
+        <span class="stat-sub">
+
+          <ng-container *ngIf="s.subKey">
+            {{ s.subKey | translate }}
+          </ng-container>
+
+          <ng-container *ngIf="s.subAmount !== undefined">
+            {{ s.subAmount | number }}
+            {{ 'currency' | translate }}
+          </ng-container>
+
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Middle -->
+  <div class="middle-grid">
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-card">
+
+      <h2 class="card-title">
+        {{ 'quick_actions' | translate }}
+      </h2>
+
+      <div class="actions-list">
+
+        <button
+          class="action-btn btn-blue"
+          (click)="navigate('/invoices')"
+        >
+          <span>
+            {{ 'action_new_invoice' | translate }}
+          </span>
+        </button>
+
+
+        <button
+          class="action-btn btn-green"
+          (click)="navigate('/accounts')"
+        >
+          <span>
+            {{ 'action_new_customer' | translate }}
+          </span>
+        </button>
+
+
+        <button
+          class="action-btn btn-purple"
+          (click)="navigate('/products')"
+        >
+          <span>
+            {{ 'action_new_product' | translate }}
+          </span>
+        </button>
+
+
+        <button
+          class="action-btn btn-amber"
+          (click)="navigate('/returns')"
+        >
+          <span>
+            {{ 'action_new_return' | translate }}
+          </span>
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- Daily Sales Chart -->
+    <div class="chart-placeholder-card">
+
+      <div class="chart-header">
+
+        <div class="chart-title-wrapper">
+
+          <h2 class="card-title">
+            {{ 'chart_title' | translate }}
+          </h2>
+
+          <p class="chart-description">
+            {{ 'chart_daily_sales' | translate }}
+          </p>
+
+        </div>
+
+        <span class="badge-growth">
+  {{ last7DaysInvoiceAmount | number }}
+  {{ 'currency' | translate }}
+</span>
+
+      </div>
+
+
+      <!-- Chart -->
+      <div class="daily-chart">
+
+        <!-- Y Axis -->
+        <div class="chart-y-axis">
+
+          <span>
+            {{ dailySalesMaxAmount | number:'1.0-0' }}
+          </span>
+
+          <span>
+            {{ (dailySalesMaxAmount * 0.75) | number:'1.0-0' }}
+          </span>
+
+          <span>
+            {{ (dailySalesMaxAmount * 0.5) | number:'1.0-0' }}
+          </span>
+
+          <span>
+            {{ (dailySalesMaxAmount * 0.25) | number:'1.0-0' }}
+          </span>
+
+          <span>
+            0
+          </span>
+
+        </div>
+
+
+        <!-- Bars Area -->
+        <div class="chart-bars">
+
+          <!-- Grid Lines -->
+          <div class="chart-grid-lines">
+
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+
+          </div>
+
+
+          <!-- Daily Bars -->
+          <div
+            class="daily-bar-wrapper"
+            *ngFor="let day of dailySales"
+          >
+
+            <!-- Value -->
+            <div class="bar-value">
+
+              <span *ngIf="day.amount > 0">
+                {{ day.amount | number }}
+              </span>
+
+            </div>
+
+
+            <!-- Bar -->
+            <div class="bar-area">
+
+              <div
+                class="daily-bar"
+                [style.height.%]="day.height"
+                [title]="
+                  day.amount + ' ' +
+                  ('currency' | translate)
+                "
+              ></div>
+
+            </div>
+
+
+            <!-- Day -->
+            <span class="bar-label">
+              {{ day.label | translate }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Chart Summary -->
+      <div class="chart-summary">
+
+  <span>
+    {{ last7DaysInvoiceCount | number }}
+    {{ 'stat_invoices' | translate }}
+  </span>
+
+</div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Bottom -->
+  <div class="bottom-grid">
+
+
+    <!-- Recent Invoices -->
+    <div class="table-card">
+
+      <div class="card-top">
+
+        <h2 class="card-title">
+          {{ 'recent_invoices' | translate }}
+        </h2>
+
+        <button
+          class="view-all-link"
+          (click)="navigate('/invoices')"
+        >
+          {{ 'view_all' | translate }}
+        </button>
+
+      </div>
+
+
+      <div class="table-responsive">
+
+        <table class="data-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                {{ 'col_invoice_id' | translate }}
+              </th>
+
+              <th>
+                {{ 'col_customer' | translate }}
+              </th>
+
+              <th>
+                {{ 'col_date' | translate }}
+              </th>
+
+              <th>
+                {{ 'col_amount' | translate }}
+              </th>
+
+              <th>
+                {{ 'col_status' | translate }}
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="let inv of recentInvoices"
+            >
+
+              <td class="code-cell">
+              <button
+                type="button"
+                class="invoice-link"
+                (click)="openInvoice(inv.id)"
+              >
+                {{ inv.id }}
+              </button>
+            </td>
+
+              <td class="customer-cell">
+                {{ inv.customerName }}
+              </td>
+
+              <td>
+                {{ inv.date }}
+              </td>
+
+              <td class="amount-cell">
+                {{ inv.amount | number }}
+                {{ 'currency' | translate }}
+              </td>
+
+              <td>
+
+                <span
+                  class="status-badge"
+                  [ngClass]="inv.statusClass"
+                >
+                  {{ inv.statusKey | translate }}
+                </span>
+
+              </td>
+
+            </tr>
+
+
+            <!-- No invoices -->
+            <tr *ngIf="recentInvoices.length === 0">
+
+              <td
+                colspan="5"
+                class="empty-cell"
+              >
+                لا توجد فواتير حتى الآن
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- Recent Customers -->
+    <div class="customers-card">
+
+      <div class="card-top">
+
+        <h2 class="card-title">
+          {{ 'recent_customers' | translate }}
+        </h2>
+
+        <button
+          class="view-all-link"
+          (click)="navigate('/accounts')"
+        >
+          {{ 'view_all' | translate }}
+        </button>
+
+      </div>
+
+
+      <div class="customers-list">
+
+        <div
+          class="customer-item"
+          *ngFor="let c of recentCustomers"
+        >
+
+          <div class="customer-avatar">
+            {{ c.avatar }}
+          </div>
+
+
+          <div class="customer-info">
+
+            <button
+              type="button"
+              class="customer-link"
+              (click)="openCustomer(c.id)"
+            >
+              {{ c.name }}
+            </button>
+
+            <p class="customer-store">
+              {{ c.store }} • {{ c.date }}
+            </p>
+
+          </div>
+
+
+          <span class="orders-count">
+            {{ c.orders }}
+          </span>
+
+        </div>
+
+
+        <!-- No customers -->
+        <div
+          class="empty-customers"
+          *ngIf="recentCustomers.length === 0"
+        >
+          لا يوجد عملاء حتى الآن
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

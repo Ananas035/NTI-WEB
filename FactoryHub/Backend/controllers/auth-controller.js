@@ -52,7 +52,7 @@ const signup = async (req, res) => {
             email: email.toLowerCase(),
             password: hashedPassword,
             phone,
-            role: 'STAFF'
+            role: 'ADMIN'
         });
 
         const token = generateToken(user);

@@ -1,0 +1,43 @@
+<aside class="app-sidebar" [class.collapsed]="isCollapsed">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 40 40" fill="none" class="logo-svg">
+        <rect width="40" height="40" rx="10" fill="#2563eb" />
+        <path d="M8 28 Q14 20 20 22 Q26 24 32 16" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" />
+        <circle cx="20" cy="22" r="2.5" fill="white" />
+        <path d="M20 22 L20 30" stroke="white" stroke-width="1.8" stroke-linecap="round" />
+        <path d="M16 30 L24 30" stroke="white" stroke-width="1.8" stroke-linecap="round" />
+        <circle cx="10" cy="26" r="2.5" fill="#93c5fd" />
+        <path d="M10 26 L10 14 Q10 12 12 12 L14 12" stroke="#93c5fd" stroke-width="1.5" fill="none" stroke-linecap="round" />
+      </svg>
+    </div>
+    <div class="brand-text" *ngIf="!isCollapsed">
+      <h2>{{ 'brand_name' | translate }}</h2>
+      <span>{{ 'brand_sub' | translate }}</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a 
+      *ngFor="let item of navItems" 
+      [routerLink]="item.path" 
+      routerLinkActive="active" 
+      class="nav-link"
+      [title]="item.labelKey | translate"
+    >
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="nav-icon">
+        <path [attr.d]="item.icon" />
+      </svg>
+      <span class="nav-label" *ngIf="!isCollapsed">{{ item.labelKey | translate }}</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="onLogout()">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="nav-icon">
+        <path d="M13 3h4v14h-4M8 14l4-4-4-4M12 10H3" />
+      </svg>
+      <span *ngIf="!isCollapsed">{{ 'logout' | translate }}</span>
+    </button>
+  </div>
+</aside>

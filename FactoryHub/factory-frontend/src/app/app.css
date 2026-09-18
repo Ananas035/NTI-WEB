@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8fafc;
+}
+
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* منع overflow العناصر الداخلية */
+  min-height: 100vh;
+}
+
+.content-body {
+  flex: 1;
+  padding: 28px;
+  overflow-y: auto;
+}

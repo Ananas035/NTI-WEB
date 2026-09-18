@@ -1,9 +1,6 @@
 const AccountTransaction = require('../models/AccountTransaction');
 const Customer = require('../models/Customer');
 
-
-// @desc    Get customer account
-// @route   GET /api/accounts/customer/:customerId
 exports.getCustomerAccount = async (req, res) => {
     try {
         const customerId = Number(req.params.customerId);

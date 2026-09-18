@@ -1,0 +1,1656 @@
+<div class="accounts-container">
+
+  <!-- PAGE HEADER -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h1 class="title">
+        {{ 'acc_title' | translate }}
+      </h1>
+
+      <p class="subtitle">
+
+        {{ 'acc_total_customers' | translate }}:
+
+        <strong>
+          {{ customers.length }}
+        </strong>
+
+      </p>
+
+    </div>
+
+
+    <button
+      class="btn-primary"
+      (click)="openAddCustomer()"
+    >
+
+      <span>
+        {{ 'acc_add_customer' | translate }}
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- LOADING -->
+
+  <div
+    class="loading-card"
+    *ngIf="isLoading"
+  >
+
+    <div class="loading-spinner"></div>
+
+    <span>
+      {{ 'acc_loading' | translate }}
+    </span>
+
+  </div>
+
+
+  <!-- ERROR -->
+
+  <div
+    class="alert-error page-error"
+    *ngIf="errorMessage && !isLoading"
+  >
+
+    {{ errorMessage | translate }}
+
+    <button
+      class="btn-retry"
+      (click)="loadAccounts()"
+    >
+      {{ 'acc_retry' | translate }}
+    </button>
+
+  </div>
+
+
+  <!-- SEARCH -->
+
+  <div
+    class="search-card"
+    *ngIf="!isLoading"
+  >
+
+    <div class="search-wrapper">
+
+      <svg
+        class="search-icon"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+      >
+
+        <circle
+          cx="8.5"
+          cy="8.5"
+          r="5"
+          stroke-width="1.5"
+        />
+
+        <path
+          d="M13 13l3.5 3.5"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+
+      </svg>
+
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        [placeholder]="'acc_search_placeholder' | translate"
+        class="search-input"
+      />
+
+    </div>
+
+  </div>
+
+
+  <!-- CUSTOMERS TABLE -->
+
+  <div
+    class="table-card"
+    *ngIf="!isLoading"
+  >
+
+    <div class="table-responsive">
+
+      <table class="data-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              {{ 'acc_customer' | translate }}
+            </th>
+
+            <th>
+              {{ 'acc_store_name' | translate }}
+            </th>
+
+            <th>
+              {{ 'acc_mobile' | translate }}
+            </th>
+
+            <th>
+              {{ 'acc_invoice_count' | translate }}
+            </th>
+
+            <th>
+              {{ 'acc_net_pieces' | translate }}
+            </th>
+
+            <th>
+              {{ 'acc_amount_due' | translate }}
+            </th>
+
+            <th style="width: 120px;">
+              {{ 'acc_actions' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let acc of customerAccounts"
+          >
+
+            <!-- Customer -->
+
+            <td>
+
+              <div class="customer-cell">
+
+                <div class="avatar">
+
+                  {{
+                    acc.name
+                      ? acc.name.charAt(0)
+                      : ('acc_unknown_initial' | translate)
+                  }}
+
+                </div>
+
+
+                <div class="meta">
+
+                  <span class="name">
+                    {{ acc.name }}
+                  </span>
+
+                  <span class="date">
+
+                    {{ 'acc_since' | translate }}
+
+                    {{ acc.joinDate }}
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- Store -->
+
+            <td>
+
+              <span class="store-tag">
+                {{ acc.store }}
+              </span>
+
+            </td>
+
+
+            <!-- Mobile -->
+
+            <td class="mono-text">
+              {{ acc.mobile }}
+            </td>
+
+
+            <!-- Orders -->
+
+            <td>
+              {{ acc.orders | number }}
+            </td>
+
+
+            <!-- Net Pieces -->
+
+            <td class="net-pieces">
+
+              {{ acc.netPieces | number }}
+
+              <span>
+                {{ 'acc_piece' | translate }}
+              </span>
+
+            </td>
+
+
+            <!-- Amount Due -->
+
+            <td
+              class="amount-due"
+              [class.negative]="acc.amountDue < 0"
+            >
+
+              {{ acc.amountDue | number }}
+
+              <span>
+                {{ 'acc_egp' | translate }}
+              </span>
+
+            </td>
+
+
+            <!-- Actions -->
+
+            <td>
+
+              <div class="actions-cell">
+
+                <!-- Statement -->
+
+                <button
+                  class="btn-icon statement"
+                  (click)="openStatement(acc)"
+                  [attr.title]="'acc_statement' | translate"
+                  [attr.aria-label]="'acc_statement' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+
+                    <rect
+                      x="2"
+                      y="5"
+                      width="16"
+                      height="12"
+                      rx="2"
+                    />
+
+                    <path d="M2 9h16" />
+
+                  </svg>
+
+                </button>
+
+
+                <!-- Edit -->
+
+                <button
+                  type="button"
+                  class="btn-icon edit"
+                  (click)="openEditCustomer(acc)"
+                  [attr.title]="'acc_edit' | translate"
+                  [attr.aria-label]="'acc_edit' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+
+                    <path d="M12 20h9" />
+
+                    <path
+                      d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"
+                    />
+
+                  </svg>
+
+                </button>
+
+
+                <!-- Delete -->
+
+                <button
+                  class="btn-icon delete"
+                  (click)="openDeleteConfirm(acc.id)"
+                  [attr.title]="'acc_delete' | translate"
+                  [attr.aria-label]="'acc_delete' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+
+                    <path d="M3 5h14" />
+
+                    <path d="M8 5V3h4v2" />
+
+                    <path
+                      d="M6 5l1 12h6l1-12"
+                    />
+
+                  </svg>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- Empty -->
+
+          <tr
+            *ngIf="customerAccounts.length === 0"
+          >
+
+            <td
+              colspan="7"
+              class="empty-state"
+            >
+              {{ 'acc_no_matching_customers' | translate }}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- ADD / EDIT CUSTOMER MODAL -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="showCustomerModal"
+  >
+
+    <div class="modal-box">
+
+      <div class="modal-header">
+
+        <h2>
+
+          {{
+            isEditingCustomer
+              ? ('acc_edit_customer' | translate)
+              : ('acc_add_customer_title' | translate)
+          }}
+
+        </h2>
+
+
+        <button
+          class="btn-close"
+          (click)="closeCustomerModal()"
+          [attr.aria-label]="'acc_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <!-- Error -->
+
+        <div
+          class="alert-error"
+          *ngIf="customerError"
+        >
+          {{ customerError | translate }}
+        </div>
+
+
+        <!-- Name -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_customer_name' | translate }} *
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="formName"
+            [placeholder]="'acc_customer_name_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Store -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_store_label' | translate }} *
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="formStore"
+            [placeholder]="'acc_store_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Mobile -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_mobile_label' | translate }} *
+          </label>
+
+          <input
+            type="tel"
+            [(ngModel)]="formMobile"
+            [placeholder]="'acc_mobile_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Address -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_address_label' | translate }} *
+          </label>
+
+          <textarea
+            rows="2"
+            [(ngModel)]="formAddress"
+            [placeholder]="'acc_address_placeholder' | translate"
+            class="form-control resize-none"
+          ></textarea>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-primary"
+          (click)="saveCustomer()"
+        >
+          {{ 'acc_save_customer' | translate }}
+        </button>
+
+
+        <button
+          class="btn-secondary"
+          (click)="closeCustomerModal()"
+        >
+          {{ 'acc_cancel' | translate }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- CUSTOMER STATEMENT MODAL -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="viewAccountCustomer"
+  >
+
+    <div class="modal-box statement-modal">
+
+      <!-- Statement Header -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+
+            {{ 'acc_statement_title' | translate }}
+
+            {{ viewAccountCustomer.name }}
+
+          </h2>
+
+
+          <p class="header-sub">
+
+            {{ viewAccountCustomer.store }}
+
+            <span>
+              •
+            </span>
+
+            {{ viewAccountCustomer.mobile }}
+
+          </p>
+
+        </div>
+
+
+        <div class="statement-header-actions">
+
+          <button
+            class="btn-sm btn-green"
+            (click)="openAddPayment()"
+          >
+            {{ 'acc_add_payment' | translate }}
+          </button>
+
+
+          <button
+            class="btn-sm btn-indigo"
+            (click)="openAddCheck()"
+          >
+            {{ 'acc_add_check' | translate }}
+          </button>
+
+
+          <button
+            class="btn-close"
+            (click)="closeStatement()"
+            [attr.aria-label]="'acc_close' | translate"
+          >
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- STATEMENT LOADING -->
+      <!-- ===================================================== -->
+
+      <div
+        class="statement-loading"
+        *ngIf="statementLoading"
+      >
+        {{ 'acc_statement_loading' | translate }}
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- STATEMENT ERROR -->
+      <!-- ===================================================== -->
+
+      <div
+        class="alert-error"
+        *ngIf="statementError"
+      >
+        {{ statementError | translate }}
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- STATEMENT BODY -->
+      <!-- ===================================================== -->
+
+      <div
+        class="modal-body statement-body"
+        *ngIf="statementSummary"
+      >
+
+
+        <!-- ===================================================== -->
+        <!-- SUMMARY CARDS -->
+        <!-- ===================================================== -->
+
+        <div class="statement-stats-grid">
+
+
+          <!-- Purchased -->
+
+          <div class="s-card blue">
+
+            <span class="label">
+              {{ 'acc_received_total' | translate }}
+            </span>
+
+            <span class="val">
+
+              {{ statementSummary.purchased | number }}
+
+              {{ 'acc_piece' | translate }}
+
+            </span>
+
+          </div>
+
+
+          <!-- Returned -->
+
+          <div class="s-card amber">
+
+            <span class="label">
+              {{ 'acc_returned_total' | translate }}
+            </span>
+
+            <span class="val">
+
+              {{ statementSummary.returned | number }}
+
+              {{ 'acc_piece' | translate }}
+
+            </span>
+
+          </div>
+
+
+          <!-- Net Pieces -->
+
+          <div class="s-card green">
+
+            <span class="label">
+              {{ 'acc_net_pieces_total' | translate }}
+            </span>
+
+            <span class="val">
+
+              {{ statementSummary.netPieces | number }}
+
+              {{ 'acc_piece' | translate }}
+
+            </span>
+
+          </div>
+
+
+          <!-- Invoice Value -->
+
+          <div class="s-card">
+
+            <span class="label">
+              {{ 'acc_invoice_value' | translate }}
+            </span>
+
+            <span class="val">
+
+              {{ statementSummary.invVal | number }}
+
+              {{ 'acc_egp' | translate }}
+
+            </span>
+
+          </div>
+
+
+          <!-- Return Value -->
+
+          <div class="s-card">
+
+            <span class="label">
+              {{ 'acc_return_value' | translate }}
+            </span>
+
+            <span class="val">
+
+              {{ statementSummary.retVal | number }}
+
+              {{ 'acc_egp' | translate }}
+
+            </span>
+
+          </div>
+
+
+          <!-- Payments -->
+
+          <div class="s-card green">
+
+            <span class="label">
+              {{ 'acc_total_paid' | translate }}
+            </span>
+
+            <span class="val">
+
+              {{ statementSummary.paidVal | number }}
+
+              {{ 'acc_egp' | translate }}
+
+            </span>
+
+          </div>
+
+
+          <!-- Balance -->
+
+          <div class="s-card due-box">
+
+            <span class="label">
+              {{ 'acc_amount_to_pay' | translate }}
+            </span>
+
+            <span
+              class="val-big"
+              [class.negative]="statementSummary.amountDue < 0"
+            >
+
+              {{ statementSummary.amountDue | number }}
+
+              {{ 'acc_egp' | translate }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- TRANSACTIONS -->
+        <!-- ===================================================== -->
+
+        <div class="statement-section">
+
+          <div class="section-title-wrap">
+
+            <h3>
+              {{ 'acc_transactions_title' | translate }}
+            </h3>
+
+
+            <button
+              type="button"
+              class="btn-link"
+              (click)="toggleFullRecord()"
+            >
+
+              {{
+                showFullRecord
+                  ? ('acc_last_5_transactions' | translate)
+                  : ('acc_view_all' | translate)
+              }}
+
+            </button>
+
+          </div>
+
+
+          <div class="table-responsive">
+
+            <table class="data-table small">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    {{ 'acc_date' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_transaction_type' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_reference' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_quantity' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_amount' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_remaining_balance' | translate }}
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  *ngFor="
+                    let t of displayedTransactions;
+                    trackBy: trackTransaction
+                  "
+                >
+
+                  <!-- Date -->
+
+                  <td>
+
+                    {{
+                      t.date === '—'
+                        ? '—'
+                        : (t.date | date:'yyyy-MM-dd')
+                    }}
+
+                  </td>
+
+
+                  <!-- Type -->
+
+                  <td>
+
+                    <span
+                      class="type-pill"
+                      [ngClass]="t.type"
+                    >
+
+                      {{
+                        t.type === 'invoice'
+                          ? ('acc_invoice' | translate)
+                          : (
+                            t.type === 'return'
+                              ? ('acc_return' | translate)
+                              : (
+                                t.type === 'payment'
+                                  ? ('acc_cash_payment' | translate)
+                                  : ('acc_check' | translate)
+                              )
+                          )
+                      }}
+
+                    </span>
+
+                  </td>
+
+
+                  <!-- Reference -->
+
+                  <td class="mono-bold">
+
+                    {{ t.refId }}
+
+                  </td>
+
+
+                  <!-- Quantity -->
+
+                  <td>
+
+                    {{ t.quantity }}
+
+                  </td>
+
+
+                  <!-- Amount -->
+
+                  <td class="font-bold">
+
+                    {{ t.amount | number }}
+
+                    {{ 'acc_egp' | translate }}
+
+                  </td>
+
+
+                  <!-- Balance -->
+
+                  <td
+                    class="font-bold text-dark"
+                    [class.negative]="(t.balance ?? 0) < 0"
+                  >
+
+                    {{ (t.balance ?? 0) | number }}
+
+                    {{ 'acc_egp' | translate }}
+
+                  </td>
+
+                </tr>
+
+
+                <!-- Empty -->
+
+                <tr
+                  *ngIf="displayedTransactions.length === 0"
+                >
+
+                  <td
+                    colspan="6"
+                    class="empty-state"
+                  >
+                    {{ 'acc_no_transactions' | translate }}
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- CHECKS -->
+        <!-- ===================================================== -->
+
+        <div class="statement-section">
+
+          <div class="section-title-wrap">
+
+            <h3>
+              {{ 'acc_checks_title' | translate }}
+            </h3>
+
+
+            <button
+              class="btn-link"
+              type="button"
+              (click)="toggleChecksView()"
+            >
+
+              {{
+                showAllChecks
+                  ? ('acc_last_5_checks' | translate)
+                  : ('acc_view_all' | translate)
+              }}
+
+            </button>
+
+          </div>
+
+
+          <div class="table-responsive">
+
+            <table class="data-table small">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    {{ 'acc_check_number' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_check_owner' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_drawn_bank' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_due_date' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_amount' | translate }}
+                  </th>
+
+                  <th>
+                    {{ 'acc_status_action' | translate }}
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr
+                  *ngFor="let chk of displayedCustomerChecks"
+                >
+
+                  <!-- Check Number -->
+
+                  <td class="mono-bold text-indigo">
+
+                    {{ chk.id }}
+
+                  </td>
+
+
+                  <!-- Issuer -->
+
+                  <td class="font-bold">
+
+                    {{
+                      chk.issuerName &&
+                      chk.issuerName !== '—'
+                        ? chk.issuerName
+                        : chk.customerName
+                    }}
+
+                  </td>
+
+
+                  <!-- Bank -->
+
+                  <td>
+
+                    {{ chk.bankName }}
+
+                  </td>
+
+
+                  <!-- Date -->
+
+                  <td>
+
+                    {{ chk.date }}
+
+                  </td>
+
+
+                  <!-- Amount -->
+
+                  <td class="font-bold">
+
+                    {{ chk.amount | number }}
+
+                    {{ 'acc_egp' | translate }}
+
+                  </td>
+
+
+                  <!-- Status -->
+
+                  <td>
+
+                    <button
+                      *ngIf="chk.status === 'pending'"
+                      type="button"
+                      class="btn-check-action pending"
+                      (click)="processCheck(chk)"
+                      [disabled]="isLoadingChecks"
+                    >
+
+                      {{
+                        isLoadingChecks
+                          ? ('acc_collecting' | translate)
+                          : ('acc_pending_check' | translate)
+                      }}
+
+                    </button>
+
+
+                    <span
+                      *ngIf="chk.status === 'processed'"
+                      class="badge-processed"
+                    >
+                      {{ 'acc_processed_check' | translate }}
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- Empty -->
+
+                <tr
+                  *ngIf="displayedCustomerChecks.length === 0"
+                >
+
+                  <td
+                    colspan="6"
+                    class="empty-state"
+                  >
+                    {{ 'acc_no_checks' | translate }}
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- PAYMENT MODAL -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="showPaymentModal"
+  >
+
+    <div class="modal-box modal-sm">
+
+      <div class="modal-header">
+
+        <h2>
+          {{ 'acc_payment_title' | translate }}
+        </h2>
+
+
+        <button
+          class="btn-close"
+          (click)="closePaymentModal()"
+          [attr.aria-label]="'acc_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div
+          class="alert-error"
+          *ngIf="payError"
+        >
+          {{ payError | translate }}
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_payment_amount' | translate }}
+          </label>
+
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="formPayAmount"
+            [placeholder]="'acc_payment_amount_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_payment_notes' | translate }}
+          </label>
+
+          <textarea
+            rows="2"
+            [(ngModel)]="formPayNotes"
+            [placeholder]="'acc_payment_notes_placeholder' | translate"
+            class="form-control resize-none"
+          ></textarea>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-primary"
+          (click)="savePayment()"
+        >
+          {{ 'acc_save_payment' | translate }}
+        </button>
+
+
+        <button
+          class="btn-secondary"
+          (click)="closePaymentModal()"
+        >
+          {{ 'acc_cancel' | translate }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- CHECK MODAL -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="showCheckModal"
+  >
+
+    <div class="modal-box modal-sm">
+
+      <div class="modal-header">
+
+        <h2>
+          {{ 'acc_check_title' | translate }}
+        </h2>
+
+
+        <button
+          class="btn-close"
+          (click)="closeCheckModal()"
+          [attr.aria-label]="'acc_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div
+          class="alert-error"
+          *ngIf="checkError"
+        >
+          {{ checkError | translate }}
+        </div>
+
+
+        <!-- Issuer -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_check_issuer' | translate }}
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="formCheckIssuer"
+            [placeholder]="'acc_check_issuer_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Bank -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_check_bank' | translate }}
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="formCheckBank"
+            [placeholder]="'acc_check_bank_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Due Date -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_check_date' | translate }}
+          </label>
+
+          <input
+            type="date"
+            [(ngModel)]="formCheckDate"
+            class="form-control"
+          />
+
+        </div>
+
+
+        <!-- Amount -->
+
+        <div class="form-group">
+
+          <label>
+            {{ 'acc_check_amount' | translate }}
+          </label>
+
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="formCheckAmount"
+            [placeholder]="'acc_check_amount_placeholder' | translate"
+            class="form-control"
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          class="btn-primary"
+          (click)="saveCheck()"
+        >
+          {{ 'acc_save_check' | translate }}
+        </button>
+
+
+        <button
+          class="btn-secondary"
+          (click)="closeCheckModal()"
+        >
+          {{ 'acc_cancel' | translate }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- DELETE CONFIRMATION -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop"
+    *ngIf="showDeleteModal"
+  >
+
+    <div class="modal-box delete-box">
+
+      <h3>
+        {{ 'acc_delete_confirm_title' | translate }}
+      </h3>
+
+
+      <p>
+        {{ 'acc_delete_confirm_text' | translate }}
+      </p>
+
+
+      <div class="modal-footer delete-footer">
+
+        <button
+          class="btn-danger"
+          (click)="confirmDelete()"
+        >
+          {{ 'acc_confirm_delete' | translate }}
+        </button>
+
+
+        <button
+          class="btn-secondary"
+          (click)="closeDeleteModal()"
+        >
+          {{ 'acc_cancel' | translate }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- CHECK DATE WARNING MODAL -->
+  <!-- ========================================================= -->
+
+  <div
+    class="check-warning-overlay"
+    *ngIf="showCheckDateWarning"
+    (click)="closeCheckDateWarning()"
+  >
+
+    <div
+      class="check-warning-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- Close -->
+
+      <button
+        type="button"
+        class="check-warning-close"
+        (click)="closeCheckDateWarning()"
+        [attr.aria-label]="'acc_close' | translate"
+      >
+        ×
+      </button>
+
+
+      <!-- Warning Icon -->
+
+      <div class="check-warning-icon">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+
+          <path
+            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+          />
+
+          <line
+            x1="12"
+            y1="9"
+            x2="12"
+            y2="13"
+          />
+
+          <line
+            x1="12"
+            y1="17"
+            x2="12.01"
+            y2="17"
+          />
+
+        </svg>
+
+      </div>
+
+
+      <!-- Title -->
+
+      <h2 class="check-warning-title">
+        {{ 'acc_warning_title' | translate }}
+      </h2>
+
+
+      <!-- Description -->
+
+      <p class="check-warning-description">
+
+        {{ 'acc_warning_description' | translate }}
+
+      </p>
+
+
+      <!-- Check Number -->
+
+      <div class="check-warning-number-box">
+
+        <span>
+          {{ 'acc_check_number_label' | translate }}
+        </span>
+
+        <strong>
+          {{ checkDateWarningNumber }}
+        </strong>
+
+      </div>
+
+
+      <!-- Collection Date -->
+
+      <div class="check-warning-date-box">
+
+        <div class="check-warning-calendar">
+
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+
+            <rect
+              x="3"
+              y="4"
+              width="18"
+              height="17"
+              rx="2"
+            />
+
+            <line
+              x1="16"
+              y1="2"
+              x2="16"
+              y2="6"
+            />
+
+            <line
+              x1="8"
+              y1="2"
+              x2="8"
+              y2="6"
+            />
+
+            <line
+              x1="3"
+              y1="10"
+              x2="21"
+              y2="10"
+            />
+
+          </svg>
+
+        </div>
+
+
+        <div class="check-warning-date-content">
+
+          <span>
+            {{ 'acc_collection_date_label' | translate }}
+          </span>
+
+          <strong>
+            {{ checkDateWarningDate }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- Information -->
+
+      <div class="check-warning-info">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+          />
+
+          <line
+            x1="12"
+            y1="11"
+            x2="12"
+            y2="16"
+          />
+
+          <line
+            x1="12"
+            y1="8"
+            x2="12.01"
+            y2="8"
+          />
+
+        </svg>
+
+        <span>
+          {{ 'acc_warning_info' | translate }}
+        </span>
+
+      </div>
+
+
+      <!-- Button -->
+
+      <button
+        type="button"
+        class="check-warning-confirm"
+        (click)="closeCheckDateWarning()"
+      >
+        {{ 'acc_understood' | translate }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

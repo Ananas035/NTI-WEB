@@ -6,10 +6,12 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { ApiService } from '../../services/api';
 import { Language } from '../../services/language';
+import { FactoryProfileService } from '../../services/factory-profile';
+import { FactoryProfile } from '../../interfaces/interface';
 import { TranslatePipe } from '../../pipes/translate-pipe';
 
 interface ApiResponse<T> {
@@ -120,6 +122,7 @@ interface InvoiceView {
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     TranslatePipe
   ],
   templateUrl: './invoices.html',
@@ -131,7 +134,9 @@ export class Invoices implements OnInit {
     private api: ApiService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private language: Language
+    private router: Router,
+    private language: Language,
+    private profileService: FactoryProfileService
   ) {}
 
   pendingInvoiceNumber = '';
@@ -189,7 +194,27 @@ export class Invoices implements OnInit {
 
   printableInvoice: InvoiceView | null = null;
 
+  // =========================
+  // Factory Branding
+  // =========================
+
+  // Factory identity rendered on the printable invoice header. Loaded from the
+  // single authoritative factory profile — never hardcoded.
+  factoryProfile: FactoryProfile | null = null;
+  factoryConfigured = false;
+  isFactoryLoaded = false;
+
   private nextItemId = 1;
+
+  // =========================
+  // Dashboard Quick Action state
+  // =========================
+
+  // Set when the page is opened with `?new=1` (dashboard Quick Action); the
+  // creation form opens as soon as the data it needs has loaded.
+  private pendingCreateInvoice = false;
+
+  private invoicesLoaded = false;
 
   // =========================
   // Translation Helper
@@ -256,6 +281,47 @@ export class Invoices implements OnInit {
       });
   }
 
+  // =========================
+  // Open Create Form From Quick Action
+  // =========================
+
+  // Opens the "Create Invoice" form once the data it needs (customers,
+  // products, and the invoice list used for numbering) has finished loading.
+  private tryOpenCreateInvoice(): void {
+
+    if (!this.pendingCreateInvoice) {
+      return;
+    }
+
+    if (
+      !this.customerLoaded ||
+      !this.productLoaded ||
+      !this.invoicesLoaded
+    ) {
+      return;
+    }
+
+    this.pendingCreateInvoice = false;
+
+    this.openCreateInvoice();
+  }
+
+  // Removes the temporary `new` query param (keeping any other params) so a
+  // refresh or a later plain visit no longer opens the creation form.
+  private consumeNewParam(): void {
+
+    this.router.navigate([], {
+
+      relativeTo: this.route,
+
+      queryParams: { new: null },
+
+      queryParamsHandling: 'merge',
+
+      replaceUrl: true
+    });
+  }
+
   ngOnInit(): void {
 
     this.customerLoaded = false;
@@ -265,21 +331,78 @@ export class Invoices implements OnInit {
     this.loadInvoices();
     this.loadCustomers();
     this.loadProducts();
+    this.loadFactoryProfile();
 
     this.route.queryParams.subscribe(params => {
 
       const invoiceNumber =
         params['invoice'];
 
-      if (!invoiceNumber) {
-        return;
+      if (invoiceNumber) {
+
+        this.pendingInvoiceNumber =
+          String(invoiceNumber);
+
+        this.tryOpenInvoiceFromQuery();
       }
 
-      this.pendingInvoiceNumber =
-        String(invoiceNumber);
+      if (params['new'] === '1') {
 
-      this.tryOpenInvoiceFromQuery();
+        this.pendingCreateInvoice = true;
+
+        // Defer one microtask so the form opens (and the temporary flag is
+        // dropped) after the current navigation/change-detection pass.
+        Promise.resolve().then(() => {
+
+          this.consumeNewParam();
+
+          this.tryOpenCreateInvoice();
+        });
+      }
     });
+  }
+
+  // =========================
+  // Load Factory Branding
+  // =========================
+
+  loadFactoryProfile(): void {
+
+    this.profileService.loadProfile().subscribe({
+
+      next: (response) => {
+
+        this.factoryProfile = response.data ?? null;
+        this.factoryConfigured = response.configured === true;
+        this.isFactoryLoaded = true;
+
+        this.cdr.detectChanges();
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Factory Profile Load Error:',
+          error
+        );
+
+        // Branding is non-critical: invoices still render, just flagged as
+        // not configured rather than printing a wrong identity.
+        this.factoryProfile = null;
+        this.factoryConfigured = false;
+        this.isFactoryLoaded = true;
+
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Absolute, browser-usable URL of the configured factory logo ('' if none).
+  getFactoryLogoUrl(): string {
+
+    return this.profileService.resolveLogoUrl(
+      this.factoryProfile?.logoUrl
+    );
   }
 
   // =========================
@@ -323,9 +446,13 @@ export class Invoices implements OnInit {
 
           this.isLoadingInvoices = false;
 
+          this.invoicesLoaded = true;
+
           this.cdr.detectChanges();
 
           this.tryOpenInvoiceFromQuery();
+
+          this.tryOpenCreateInvoice();
         },
 
         error: (error) => {
@@ -343,7 +470,11 @@ export class Invoices implements OnInit {
 
           this.isLoadingInvoices = false;
 
+          this.invoicesLoaded = true;
+
           this.cdr.detectChanges();
+
+          this.tryOpenCreateInvoice();
         }
 
       });
@@ -534,6 +665,8 @@ export class Invoices implements OnInit {
       this.isLoadingFormData = false;
 
       this.cdr.detectChanges();
+
+      this.tryOpenCreateInvoice();
     }
   }
 

@@ -6,6 +6,7 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { ProductModel } from '../../interfaces/interface';
 import { ApiService } from '../../services/api';
@@ -156,7 +157,9 @@ export class Products implements OnInit {
 
   constructor(
     private api: ApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
 
@@ -166,7 +169,47 @@ export class Products implements OnInit {
 
   ngOnInit(): void {
 
+    // Quick Action "Add New Model": open the creation form right away.
+    this.route.queryParams.subscribe(params => {
+
+      if (params['new'] === '1') {
+
+        // Defer one microtask so the modal opens (and the temporary flag is
+        // dropped) after the current navigation/change-detection pass.
+        Promise.resolve().then(() => {
+
+          this.openAddModal();
+
+          this.cdr.detectChanges();
+
+          this.consumeNewParam();
+        });
+      }
+    });
+
     this.loadProducts();
+
+  }
+
+
+  // =========================================================
+  // Consume the `new` navigation flag
+  // =========================================================
+
+  // Removes the temporary `new` query param from the URL (keeping any other
+  // params) so a refresh or a later plain visit no longer opens the form.
+  private consumeNewParam(): void {
+
+    this.router.navigate([], {
+
+      relativeTo: this.route,
+
+      queryParams: { new: null },
+
+      queryParamsHandling: 'merge',
+
+      replaceUrl: true
+    });
 
   }
 

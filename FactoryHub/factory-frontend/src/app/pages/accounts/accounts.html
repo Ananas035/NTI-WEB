@@ -299,6 +299,36 @@
                 </button>
 
 
+                <!-- Export Account Statement (PDF) -->
+
+                <button
+                  type="button"
+                  class="btn-icon export"
+                  (click)="openStatementPeriodModal(acc)"
+                  [attr.title]="'acc_export_statement' | translate"
+                  [attr.aria-label]="'acc_export_statement' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+
+                    <path d="M10 2.5v9" />
+
+                    <path d="M6.5 8L10 11.5 13.5 8" />
+
+                    <path d="M4 15.5h12" />
+
+                  </svg>
+
+                </button>
+
+
                 <!-- Edit -->
 
                 <button
@@ -589,6 +619,15 @@
             (click)="openAddCheck()"
           >
             {{ 'acc_add_check' | translate }}
+          </button>
+
+
+          <button
+            type="button"
+            class="btn-sm btn-green"
+            (click)="openStatementPeriodModal(viewAccountCustomer)"
+          >
+            {{ 'acc_export_statement' | translate }}
           </button>
 
 
@@ -1152,6 +1191,558 @@
         </div>
 
 
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- STATEMENT PERIOD MODAL (PDF export) -->
+  <!-- ========================================================= -->
+
+  <div
+    class="modal-backdrop print-hide"
+    *ngIf="showStatementPeriodModal"
+  >
+
+    <div class="modal-box modal-sm period-modal">
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+            {{ 'acc_statement_period_title' | translate }}
+          </h2>
+
+          <p class="header-sub">
+            {{ statementPeriodCustomer?.name }}
+          </p>
+
+        </div>
+
+
+        <button
+          class="btn-close"
+          type="button"
+          (click)="closeStatementPeriodModal()"
+          [attr.aria-label]="'acc_close' | translate"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <p class="period-hint">
+          {{ 'acc_statement_period_hint' | translate }}
+        </p>
+
+
+        <div class="period-options">
+
+          <button
+            type="button"
+            class="period-option"
+            [class.active]="statementPeriod === '1m'"
+            (click)="selectStatementPeriod('1m')"
+          >
+            {{ 'acc_period_1m' | translate }}
+          </button>
+
+
+          <button
+            type="button"
+            class="period-option"
+            [class.active]="statementPeriod === '3m'"
+            (click)="selectStatementPeriod('3m')"
+          >
+            {{ 'acc_period_3m' | translate }}
+          </button>
+
+
+          <button
+            type="button"
+            class="period-option"
+            [class.active]="statementPeriod === '6m'"
+            (click)="selectStatementPeriod('6m')"
+          >
+            {{ 'acc_period_6m' | translate }}
+          </button>
+
+        </div>
+
+
+        <div
+          class="alert-error"
+          *ngIf="statementPeriodError"
+        >
+          {{ statementPeriodError | translate }}
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="generateStatementPdf()"
+          [disabled]="isExportingStatement"
+        >
+          {{
+            isExportingStatement
+              ? ('acc_statement_generating' | translate)
+              : ('acc_statement_generate' | translate)
+          }}
+        </button>
+
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="closeStatementPeriodModal()"
+          [disabled]="isExportingStatement"
+        >
+          {{ 'acc_cancel' | translate }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- STATEMENT PRINT CONTAINER (screen-hidden, print-only) -->
+  <!-- ========================================================= -->
+
+  <div
+    class="print-container"
+    *ngIf="printableStatement"
+  >
+
+    <div class="statement-paper">
+
+
+      <!-- Header -->
+
+      <div class="stmt-header">
+
+        <div class="stmt-header-right">
+
+          <h1 class="stmt-brand-title">
+
+            {{
+              factoryProfile?.factoryName
+                ? factoryProfile?.factoryName
+                : ('fac_not_configured' | translate)
+            }}
+
+          </h1>
+
+
+          <ng-container *ngIf="factoryProfile?.managerName">
+
+            <p class="stmt-manager-label">
+              {{ 'inv_admin_label' | translate }}
+            </p>
+
+            <p class="stmt-manager">
+              {{ factoryProfile?.managerName }}
+            </p>
+
+          </ng-container>
+
+
+          <p
+            class="stmt-phone"
+            *ngIf="factoryProfile?.phone"
+          >
+            {{ 'fac_phone' | translate }}: {{ factoryProfile?.phone }}
+          </p>
+
+        </div>
+
+
+        <div
+          class="stmt-header-center"
+          *ngIf="getFactoryLogoUrl()"
+        >
+
+          <img
+            class="stmt-header-logo"
+            [src]="getFactoryLogoUrl()"
+            [alt]="'fac_logo' | translate"
+          />
+
+        </div>
+
+
+        <div class="stmt-header-left">
+
+          <h2 class="stmt-doc-title">
+            {{ 'acc_statement_doc_title' | translate }}
+          </h2>
+
+
+          <p class="stmt-meta-row">
+
+            <span>
+              {{ 'acc_statement_customer_id' | translate }}
+            </span>
+
+            <strong>
+              {{ printableStatement.customer.customerId }}
+            </strong>
+
+          </p>
+
+
+          <p class="stmt-meta-row">
+
+            <span>
+              {{ 'acc_statement_period_label' | translate }}
+            </span>
+
+            <strong>
+
+              {{ formatStatementDate(printableStatement.period.fromDate) }}
+
+              {{ 'acc_statement_to' | translate }}
+
+              {{ formatStatementDate(printableStatement.period.toDate) }}
+
+            </strong>
+
+          </p>
+
+
+          <p class="stmt-meta-row">
+
+            <span>
+              {{ 'acc_statement_generated_at' | translate }}
+            </span>
+
+            <strong>
+              {{ formatStatementDate(printableStatement.generatedAt) }}
+            </strong>
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="stmt-divider"></div>
+
+
+      <!-- Customer -->
+
+      <div class="stmt-customer-box">
+
+        <div class="stmt-customer-line">
+
+          <span>
+            {{ 'acc_statement_customer' | translate }}
+          </span>
+
+          <strong>
+            {{ printableStatement.customer.name }}
+          </strong>
+
+        </div>
+
+
+        <div
+          class="stmt-customer-line"
+          *ngIf="printableStatement.customer.showroomName"
+        >
+
+          <span>
+            {{ 'ret_print_store' | translate }}
+          </span>
+
+          <strong>
+            {{ printableStatement.customer.showroomName }}
+          </strong>
+
+        </div>
+
+
+        <div
+          class="stmt-customer-line"
+          *ngIf="printableStatement.customer.mobileNumber"
+        >
+
+          <span>
+            {{ 'ret_print_phone' | translate }}
+          </span>
+
+          <strong>
+            {{ printableStatement.customer.mobileNumber }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- Summary -->
+
+      <div class="stmt-summary-grid">
+
+        <div class="stmt-summary-card">
+
+          <span>
+            {{ 'acc_statement_opening_balance' | translate }}
+          </span>
+
+          <strong>
+
+            {{ printableStatement.openingBalance | number }}
+
+            {{ 'acc_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="stmt-summary-card">
+
+          <span>
+            {{ 'acc_statement_sales_total' | translate }}
+          </span>
+
+          <strong>
+
+            {{ printableStatement.totals.sales | number }}
+
+            {{ 'acc_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="stmt-summary-card">
+
+          <span>
+            {{ 'acc_statement_returns_total' | translate }}
+          </span>
+
+          <strong>
+
+            {{ printableStatement.totals.returns | number }}
+
+            {{ 'acc_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="stmt-summary-card">
+
+          <span>
+            {{ 'acc_statement_payments_total' | translate }}
+          </span>
+
+          <strong>
+
+            {{ printableStatement.totals.payments | number }}
+
+            {{ 'acc_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="stmt-summary-card highlight">
+
+          <span>
+            {{ 'acc_statement_closing_balance' | translate }}
+          </span>
+
+          <strong>
+
+            {{ printableStatement.closingBalance | number }}
+
+            {{ 'acc_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- Transactions -->
+
+      <table class="stmt-table">
+
+        <thead>
+
+          <tr>
+
+            <th style="width: 80px;">
+              {{ 'acc_th_date' | translate }}
+            </th>
+
+            <th style="width: 92px;">
+              {{ 'acc_th_document' | translate }}
+            </th>
+
+            <th style="width: 92px;">
+              {{ 'acc_th_type' | translate }}
+            </th>
+
+            <th>
+              {{ 'acc_th_description' | translate }}
+            </th>
+
+            <th style="width: 58px;">
+              {{ 'acc_th_quantity' | translate }}
+            </th>
+
+            <th style="width: 82px;">
+              {{ 'acc_th_debit' | translate }}
+            </th>
+
+            <th style="width: 82px;">
+              {{ 'acc_th_credit' | translate }}
+            </th>
+
+            <th style="width: 88px;">
+              {{ 'acc_th_balance' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <ng-container
+            *ngFor="
+              let txn of printableStatement.transactions
+            "
+          >
+
+            <!-- Document summary row -->
+
+            <tr class="stmt-row-doc">
+
+              <td>
+                {{ formatStatementDate(txn.date) }}
+              </td>
+
+              <td class="stmt-mono">
+                {{ txn.referenceNumber }}
+              </td>
+
+              <td>
+                {{ statementTypeLabel(txn.type) }}
+              </td>
+
+              <td class="stmt-doc-desc">
+                {{ txn.notes }}
+              </td>
+
+              <td class="stmt-center">
+                {{ txn.quantity || '—' }}
+              </td>
+
+              <td class="stmt-num">
+                {{ txn.debit ? (txn.debit | number) : '—' }}
+              </td>
+
+              <td class="stmt-num">
+                {{ txn.credit ? (txn.credit | number) : '—' }}
+              </td>
+
+              <td class="stmt-num stmt-balance">
+                {{ txn.balance | number }}
+              </td>
+
+            </tr>
+
+
+            <!-- Subordinate item rows (no financial totals repeated) -->
+
+            <tr
+              class="stmt-row-item"
+              *ngFor="let item of txn.items"
+            >
+
+              <td></td>
+
+              <td></td>
+
+              <td></td>
+
+              <td class="stmt-item-desc">
+
+                {{
+                  item.modelName ||
+                  ('ret_model_fallback' | translate)
+                }}
+
+                ({{ item.modelCode }})
+
+              </td>
+
+              <td class="stmt-center">
+                {{ item.quantity }}
+              </td>
+
+              <td class="stmt-num">
+                {{ item.unitPrice | number }}
+              </td>
+
+              <td class="stmt-num">
+                {{ item.total | number }}
+              </td>
+
+              <td></td>
+
+            </tr>
+
+          </ng-container>
+
+
+          <tr
+            *ngIf="
+              printableStatement.transactions.length === 0
+            "
+          >
+
+            <td
+              colspan="8"
+              class="stmt-center stmt-empty"
+            >
+              {{ 'acc_no_transactions' | translate }}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+
+      <div class="stmt-footer-note">
+        {{ 'acc_statement_footer_note' | translate }}
       </div>
 
     </div>

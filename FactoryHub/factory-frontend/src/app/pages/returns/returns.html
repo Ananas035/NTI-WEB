@@ -61,6 +61,16 @@
   </div>
 
 
+  <div
+    class="alert-error"
+    *ngIf="printError && !showModal"
+  >
+
+    {{ printError | translate }}
+
+  </div>
+
+
   <!-- ========================= -->
   <!-- Search -->
   <!-- ========================= -->
@@ -258,6 +268,37 @@
                       cy="10"
                       r="3"
                     />
+
+                  </svg>
+
+                </button>
+
+
+                <!-- Download Return PDF -->
+
+                <button
+                  class="btn-icon print"
+                  type="button"
+                  (click)="openPrintReturn(ret)"
+                  [disabled]="printingReturnId === ret.id"
+                  [attr.title]="'ret_download_pdf' | translate"
+                  [attr.aria-label]="'ret_download_pdf' | translate"
+                >
+
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+
+                    <path d="M10 2.5v9" />
+
+                    <path d="M6.5 8L10 11.5 13.5 8" />
+
+                    <path d="M4 15.5h12" />
 
                   </svg>
 
@@ -700,6 +741,20 @@
         </button>
 
 
+        <!-- Save, then download the return document (read-only). -->
+
+        <button
+          class="btn-print"
+          type="button"
+          (click)="saveReturn(true)"
+          [disabled]="isSaving"
+        >
+
+          {{ 'ret_save_print' | translate }}
+
+        </button>
+
+
         <button
           class="btn-secondary"
           type="button"
@@ -947,6 +1002,18 @@
       <div class="modal-footer">
 
         <button
+          class="btn-print"
+          type="button"
+          (click)="openPrintReturn(viewingReturn)"
+          [disabled]="printingReturnId === viewingReturn.id"
+        >
+
+          {{ 'ret_download_pdf' | translate }}
+
+        </button>
+
+
+        <button
           class="btn-secondary full-width"
           type="button"
           (click)="closeViewModal()"
@@ -957,6 +1024,298 @@
         </button>
 
       </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- Return Print Container (screen-hidden, print-only) -->
+  <!-- ====================================================== -->
+
+  <div
+    class="print-container"
+    *ngIf="printableReturn"
+  >
+
+    <div class="return-paper">
+
+
+      <!-- Header -->
+
+      <div class="ret-header">
+
+        <div class="ret-header-right">
+
+          <h1 class="ret-brand-title">
+
+            {{
+              factoryProfile?.factoryName
+                ? factoryProfile?.factoryName
+                : ('fac_not_configured' | translate)
+            }}
+
+          </h1>
+
+
+          <ng-container *ngIf="factoryProfile?.managerName">
+
+            <p class="ret-manager-label">
+              {{ 'inv_admin_label' | translate }}
+            </p>
+
+            <p class="ret-manager">
+              {{ factoryProfile?.managerName }}
+            </p>
+
+          </ng-container>
+
+
+          <p
+            class="ret-phone"
+            *ngIf="factoryProfile?.phone"
+          >
+            {{ 'fac_phone' | translate }}: {{ factoryProfile?.phone }}
+          </p>
+
+        </div>
+
+
+        <div
+          class="ret-header-center"
+          *ngIf="getFactoryLogoUrl()"
+        >
+
+          <img
+            class="ret-header-logo"
+            [src]="getFactoryLogoUrl()"
+            [alt]="'fac_logo' | translate"
+          />
+
+        </div>
+
+
+        <div class="ret-header-left">
+
+          <h2 class="ret-doc-title">
+            {{ 'ret_print_title' | translate }}
+          </h2>
+
+
+          <p class="ret-meta-row">
+
+            <span>
+              {{ 'ret_print_number' | translate }}
+            </span>
+
+            <strong>
+              {{ printableReturn.id }}
+            </strong>
+
+          </p>
+
+
+          <p class="ret-meta-row">
+
+            <span>
+              {{ 'ret_print_date' | translate }}
+            </span>
+
+            <strong>
+              {{ printableReturn.date }}
+            </strong>
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="ret-divider"></div>
+
+
+      <!-- Customer -->
+
+      <div class="ret-customer-box">
+
+        <div class="ret-customer-line">
+
+          <span>
+            {{ 'ret_print_customer' | translate }}
+          </span>
+
+          <strong>
+            {{ printableReturn.customerName }}
+          </strong>
+
+        </div>
+
+
+        <div
+          class="ret-customer-line"
+          *ngIf="printableReturn.customerStore"
+        >
+
+          <span>
+            {{ 'ret_print_store' | translate }}
+          </span>
+
+          <strong>
+            {{ printableReturn.customerStore }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- Items -->
+
+      <table class="ret-items-table">
+
+        <thead>
+
+          <tr>
+
+            <th style="width: 45px;">
+              #
+            </th>
+
+            <th style="width: 130px;">
+              {{ 'ret_print_model_code' | translate }}
+            </th>
+
+            <th>
+              {{ 'ret_print_model_name' | translate }}
+            </th>
+
+            <th style="width: 110px;">
+              {{ 'ret_print_quantity' | translate }}
+            </th>
+
+            <th style="width: 120px;">
+              {{ 'ret_print_unit_price' | translate }}
+            </th>
+
+            <th style="width: 130px;">
+              {{ 'ret_print_total' | translate }}
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let it of printableReturn.items;
+              let idx = index
+            "
+          >
+
+            <td class="ret-center">
+              {{ idx + 1 }}
+            </td>
+
+            <td class="ret-mono">
+              {{ it.modelCode }}
+            </td>
+
+            <td class="ret-semibold">
+
+              {{
+                it.modelName ||
+                (
+                  ('ret_model_fallback' | translate) +
+                  ' ' +
+                  it.modelCode
+                )
+              }}
+
+            </td>
+
+            <td>
+
+              {{ it.quantity }}
+
+              {{ 'ret_piece' | translate }}
+
+            </td>
+
+            <td>
+
+              {{ it.unitPrice | number }}
+
+              {{ 'ret_egp' | translate }}
+
+            </td>
+
+            <td class="ret-strong">
+
+              {{ it.total | number }}
+
+              {{ 'ret_egp' | translate }}
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+
+      <!-- Footer -->
+
+      <div class="ret-footer-wrap">
+
+        <div class="ret-total-card">
+
+          <span class="ret-total-caption">
+            {{ 'ret_print_total_pieces' | translate }}
+          </span>
+
+          <strong class="ret-total-num">
+
+            {{
+              calculateTotalPieces(
+                printableReturn.items
+              ) | number
+            }}
+
+            {{ 'ret_piece' | translate }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="ret-total-card highlight">
+
+          <span class="ret-total-caption">
+            {{ 'ret_print_total_value' | translate }}
+          </span>
+
+          <strong class="ret-total-num">
+
+            {{ printableReturn.amount | number }}
+
+            {{ 'ret_egp' | translate }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <p class="ret-note">
+        {{ 'ret_print_note' | translate }}
+      </p>
 
     </div>
 

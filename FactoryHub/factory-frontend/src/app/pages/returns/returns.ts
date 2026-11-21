@@ -6,9 +6,12 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { ApiService } from '../../services/api';
 import { Language } from '../../services/language';
+import { FactoryProfileService } from '../../services/factory-profile';
+import { FactoryProfile } from '../../interfaces/interface';
 import { TranslatePipe } from '../../pipes/translate-pipe';
 
 interface ApiResponse<T> {
@@ -129,7 +132,10 @@ export class Returns implements OnInit {
   constructor(
     private api: ApiService,
     private cdr: ChangeDetectorRef,
-    private language: Language
+    private language: Language,
+    private route: ActivatedRoute,
+    private router: Router,
+    private factoryProfileService: FactoryProfileService
   ) {}
 
   // =========================
@@ -176,6 +182,18 @@ export class Returns implements OnInit {
   viewingReturn: ReturnView | null = null;
 
   // =========================
+  // Return PDF
+  // =========================
+
+  factoryProfile: FactoryProfile | null = null;
+
+  printableReturn: ReturnView | null = null;
+
+  printingReturnId: string | null = null;
+
+  printError = '';
+
+  // =========================
   // Internal IDs
   // =========================
 
@@ -183,6 +201,10 @@ export class Returns implements OnInit {
 
   private customersLoaded = false;
   private productsLoaded = false;
+
+  // Dashboard Quick Action state
+  private returnsLoaded = false;
+  private pendingCreateReturn = false;
 
   // =========================
   // Translation Helper
@@ -198,9 +220,31 @@ export class Returns implements OnInit {
 
   ngOnInit(): void {
 
+    // Quick Action "Register New Return": open the creation form once the
+    // data it needs (returns, customers, products) has finished loading.
+    this.route.queryParams.subscribe(params => {
+
+      if (params['new'] === '1') {
+
+        this.pendingCreateReturn = true;
+
+        // Defer one microtask so the form opens (and the temporary flag is
+        // dropped) after the current navigation/change-detection pass.
+        Promise.resolve().then(() => {
+
+          this.consumeNewParam();
+
+          this.tryOpenCreateReturn();
+        });
+      }
+    });
+
     this.loadReturns();
     this.loadCustomers();
     this.loadProducts();
+
+    // Branding for the return document (logo, factory name, manager, phone).
+    this.loadFactoryProfile();
 
   }
 
@@ -248,7 +292,11 @@ export class Returns implements OnInit {
 
           this.isLoadingReturns = false;
 
+          this.returnsLoaded = true;
+
           this.cdr.detectChanges();
+
+          this.tryOpenCreateReturn();
         },
 
         error: (error) => {
@@ -266,7 +314,11 @@ export class Returns implements OnInit {
 
           this.isLoadingReturns = false;
 
+          this.returnsLoaded = true;
+
           this.cdr.detectChanges();
+
+          this.tryOpenCreateReturn();
         }
       });
   }
@@ -454,7 +506,50 @@ export class Returns implements OnInit {
 
       this.isLoadingFormData = false;
 
+      this.tryOpenCreateReturn();
+
     }
+  }
+
+  // =========================
+  // Open Create Form From Quick Action
+  // =========================
+
+  // Opens the "New Return" form once the data it needs (customers, products,
+  // and the returns list used for numbering) has finished loading.
+  private tryOpenCreateReturn(): void {
+
+    if (!this.pendingCreateReturn) {
+      return;
+    }
+
+    if (
+      !this.customersLoaded ||
+      !this.productsLoaded ||
+      !this.returnsLoaded
+    ) {
+      return;
+    }
+
+    this.pendingCreateReturn = false;
+
+    this.openAddModal();
+  }
+
+  // Removes the temporary `new` query param (keeping any other params) so a
+  // refresh or a later plain visit no longer opens the creation form.
+  private consumeNewParam(): void {
+
+    this.router.navigate([], {
+
+      relativeTo: this.route,
+
+      queryParams: { new: null },
+
+      queryParamsHandling: 'merge',
+
+      replaceUrl: true
+    });
   }
 
   // =========================
@@ -822,9 +917,14 @@ export class Returns implements OnInit {
   // Save Return
   // =========================
 
-  saveReturn(): void {
+  saveReturn(andPrint = false): void {
 
     this.errorMessage = '';
+
+    // Prevent duplicate submissions while a request is in flight.
+    if (this.isSaving) {
+      return;
+    }
 
     // -------------------------
     // Customer
@@ -975,6 +1075,13 @@ export class Returns implements OnInit {
           this.loadProducts();
 
           this.cdr.detectChanges();
+
+          // "Save & Print": the record already exists, so the document is
+          // rendered from the saved return — no second write of any kind.
+          if (andPrint) {
+
+            this.printReturn(createdReturn);
+          }
         },
 
         error: (error) => {
@@ -1080,6 +1187,193 @@ export class Returns implements OnInit {
     this.viewLoading = false;
 
     this.viewErrorMessage = '';
+  }
+
+  // =========================
+  // Factory Branding
+  // =========================
+
+  private loadFactoryProfile(): void {
+
+    this.factoryProfileService
+      .loadProfile()
+      .subscribe({
+
+        next: () => {
+
+          this.factoryProfile =
+            this.factoryProfileService.profile;
+
+          this.cdr.detectChanges();
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Factory Profile Load Error:',
+            error
+          );
+        }
+      });
+  }
+
+  getFactoryLogoUrl(): string {
+
+    return this.factoryProfileService
+      .resolveLogoUrl(
+        this.factoryProfile?.logoUrl
+      );
+  }
+
+  // =========================
+  // Print / Download Return PDF
+  // =========================
+
+  // Renders the saved return into the hidden print document and opens the
+  // browser print dialog (the same mechanism the invoices page uses).
+  //
+  // Read-only: it never touches inventory, balances or the return record.
+  printReturn(
+    ret: ReturnView
+  ): void {
+
+    this.printableReturn = {
+
+      ...ret,
+
+      items:
+        ret.items.map(
+          item => ({
+            ...item
+          })
+        )
+    };
+
+    const originalTitle =
+      document.title;
+
+    document.title =
+      `Return_${this.sanitizeFilename(ret.id)}_` +
+      `${this.sanitizeFilename(ret.customerName)}`;
+
+    window.onafterprint = () => {
+
+      document.title = originalTitle;
+
+      this.printableReturn = null;
+
+      window.onafterprint = null;
+
+      this.cdr.detectChanges();
+    };
+
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  }
+
+  // Used by the list action: re-read the saved return from the backend (source
+  // of truth), then print it. The row already carries the data, but re-reading
+  // guarantees the document matches what is stored.
+  openPrintReturn(
+    ret: ReturnView
+  ): void {
+
+    if (this.printingReturnId) {
+      return;
+    }
+
+    this.printingReturnId = ret.id;
+
+    this.printError = '';
+
+    this.api
+      .get<ApiResponse<BackendReturn>>(
+        `/returns/${encodeURIComponent(
+          ret.id
+        )}`
+      )
+      .subscribe({
+
+        next: (response) => {
+
+          this.printingReturnId = null;
+
+          if (
+            response.success &&
+            response.data
+          ) {
+
+            this.printReturn(
+              this.mapBackendReturn(
+                response.data
+              )
+            );
+
+          } else {
+
+            this.printError =
+              'ret_print_error';
+          }
+
+          this.cdr.detectChanges();
+        },
+
+        error: (error) => {
+
+          this.printingReturnId = null;
+
+          console.error(
+            'Return Print Error:',
+            error
+          );
+
+          this.printError =
+            'ret_print_error';
+
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  // dd/mm/yyyy for the printed document.
+  formatPrintDate(
+    value?: string
+  ): string {
+
+    if (!value) {
+      return '—';
+    }
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) {
+      return '—';
+    }
+
+    const day =
+      String(date.getDate()).padStart(2, '0');
+
+    const month =
+      String(date.getMonth() + 1).padStart(2, '0');
+
+    return `${day}/${month}/${date.getFullYear()}`;
+  }
+
+  // Keep the download filename / document title free of characters that break
+  // downloads on any OS.
+  private sanitizeFilename(value: string): string {
+
+    return (
+      (value || 'Return')
+        .replace(/[\\/:*?"<>|]+/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+      || 'Return'
+    );
   }
 
   // =========================

@@ -21,7 +21,13 @@ export class App {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       const url = event.urlAfterRedirects || event.url;
-      this.isAuthPage = url.includes('/login') || url.includes('/signup');
+      this.isAuthPage =
+        url.includes('/login') ||
+        url.includes('/signup') ||
+        url.includes('/verify-otp') ||
+        url.includes('/forgot-password') ||
+        url.includes('/verify-reset-otp') ||
+        url.includes('/reset-password');
     });
   }
 

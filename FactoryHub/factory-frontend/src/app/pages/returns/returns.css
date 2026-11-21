@@ -363,3 +363,26 @@
 
 .delete-box { text-align: center; padding: 24px; max-width: 380px; }
 .delete-footer { justify-content: center; background: transparent; border: none; padding: 0; }
+
+
+/* =============================================================
+   Return PDF
+   ============================================================= */
+
+.btn-print {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  color: #ffffff;
+  background-color: #0d1526;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-print:hover { background-color: #1e293b; }
+.btn-print:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-icon.print:hover { background-color: #ecfdf5; color: #059669; }
+.btn-icon:disabled { opacity: 0.5; cursor: not-allowed; }

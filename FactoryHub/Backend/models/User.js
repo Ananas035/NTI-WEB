@@ -29,7 +29,40 @@ const userSchema = new mongoose.Schema(
 
         role: {
             type: String,
-            enum: ['ADMIN']
+            // ADMIN is the factory-administrator role (may configure the
+            // factory profile). STAFF is a regular employee role that may view
+            // the profile but never change it. Existing accounts are ADMIN and
+            // keep working unchanged.
+            enum: ['ADMIN', 'STAFF'],
+            default: 'ADMIN'
+        },
+
+        // Email verification state.
+        // Defaults to false for NEW accounts so an account can never be used
+        // before its OTP challenge is verified. Pre-existing documents that
+        // were created before this field existed have no value here, so
+        // `isEmailVerified !== true` correctly treats them as unverified as
+        // well (see middleware/auth-middleware.js). Existing accounts are
+        // migrated deliberately with scripts/migrate-legacy-users.js.
+        isEmailVerified: {
+            type: Boolean,
+            default: false,
+            index: true
+        },
+
+        emailVerifiedAt: {
+            type: Date,
+            default: null
+        },
+
+        // Session/token version. Embedded into every access JWT and compared on
+        // each protected request. Incrementing it revokes all previously issued
+        // access tokens for this user (used after a password reset). Defaults to
+        // 0 so existing tokens/users without the field remain valid until the
+        // first reset.
+        tokenVersion: {
+            type: Number,
+            default: 0
         }
     },
     {

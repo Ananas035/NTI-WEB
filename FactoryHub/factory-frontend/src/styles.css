@@ -92,3 +92,316 @@ html[dir="ltr"] .data-table,
 html[dir="ltr"] .action-btn {
   text-align: left;
 }
+
+/* =============================================================
+   Printable documents
+   (Customer Account Statement  +  Return Invoice)
+
+   Both documents reuse one layout system. Their markup lives inside a
+   `.print-container`, which is hidden on screen and revealed only while
+   printing, so the ordinary page is never affected. Arabic/RTL and
+   English/LTR both render from the same rules; the centered logo header
+   mirrors the sales-invoice header.
+   ============================================================= */
+
+.print-container {
+  display: none !important;
+}
+
+.statement-paper,
+.return-paper {
+  background: #ffffff;
+  width: 100%;
+  color: #0f172a;
+  direction: rtl;
+}
+
+.statement-paper { max-width: 900px; padding: 40px; }
+.return-paper { max-width: 820px; padding: 40px; }
+
+/* Header: factory identity | centered logo | document meta */
+
+.stmt-header,
+.ret-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+}
+
+.stmt-header-right,
+.ret-header-right { text-align: right; }
+
+.stmt-brand-title,
+.ret-brand-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0d1526;
+  margin: 0 0 6px 0;
+}
+
+.ret-brand-title { font-size: 26px; }
+
+.stmt-manager-label,
+.ret-manager-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 8px 0 2px 0;
+}
+
+.stmt-manager,
+.ret-manager {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.stmt-phone,
+.ret-phone {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 6px 0 0 0;
+}
+
+.stmt-header-center,
+.ret-header-center {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6mm;
+}
+
+.stmt-header-logo,
+.ret-header-logo {
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.stmt-header-logo { max-width: 45mm; max-height: 32mm; }
+.ret-header-logo { max-width: 50mm; max-height: 36mm; }
+
+.stmt-header-left,
+.ret-header-left { text-align: left; direction: ltr; }
+
+.stmt-doc-title,
+.ret-doc-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 10px 0;
+  direction: rtl;
+  text-align: right;
+}
+
+.stmt-doc-title { color: #2563eb; }
+.ret-doc-title { color: #d97706; }
+
+.stmt-meta-row,
+.ret-meta-row {
+  font-size: 13px;
+  color: #0f172a;
+  margin: 4px 0;
+  direction: rtl;
+  text-align: right;
+}
+
+.stmt-meta-row span,
+.ret-meta-row span { color: #475569; margin-inline-end: 6px; }
+
+.stmt-divider,
+.ret-divider {
+  height: 2px;
+  background-color: #0d1526;
+  margin-bottom: 18px;
+  width: 100%;
+}
+
+/* Customer block */
+
+.stmt-customer-box,
+.ret-customer-box {
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.stmt-customer-box { background-color: #f8fafc; margin-bottom: 18px; }
+.ret-customer-box { background-color: #fffbeb; margin-bottom: 20px; }
+
+.stmt-customer-line,
+.ret-customer-line { margin: 3px 0; }
+
+.stmt-customer-line span { color: #475569; margin-inline-end: 6px; }
+.ret-customer-line span { color: #92400e; margin-inline-end: 6px; }
+
+.stmt-customer-line strong,
+.ret-customer-line strong { color: #0f172a; }
+
+/* Account statement summary cards */
+
+.stmt-summary-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.stmt-summary-card {
+  flex: 1 1 140px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.stmt-summary-card span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.stmt-summary-card strong { font-size: 16px; font-weight: 800; color: #0f172a; }
+
+.stmt-summary-card.highlight { background-color: #0d1526; border-color: #0d1526; }
+.stmt-summary-card.highlight span { color: #cbd5e1; }
+.stmt-summary-card.highlight strong { color: #ffffff; }
+
+/* Tables (repeated headers + no row splitting across pages) */
+
+.stmt-table,
+.ret-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 12px;
+}
+
+.stmt-table th,
+.ret-items-table th {
+  background-color: #0d1526 !important;
+  color: #ffffff !important;
+  padding: 8px;
+  font-weight: 700;
+}
+
+.stmt-table td,
+.ret-items-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: top;
+}
+
+.ret-items-table { font-size: 13px; margin-bottom: 26px; }
+.ret-items-table td { padding: 12px; }
+
+.stmt-table thead,
+.ret-items-table thead { display: table-header-group; }
+
+.stmt-table tr,
+.ret-items-table tr { page-break-inside: avoid; }
+
+.stmt-row-item td { background-color: #fbfcfe; font-size: 11px; color: #475569; }
+.stmt-item-desc { padding-inline-start: 16px !important; }
+.stmt-doc-desc { color: #475569; }
+.stmt-num { text-align: center; white-space: nowrap; }
+.stmt-balance { font-weight: 700; }
+.stmt-mono,
+.ret-mono { font-family: monospace; font-weight: 700; }
+.stmt-center,
+.ret-center { text-align: center; }
+.ret-semibold { font-weight: 600; }
+.ret-strong { font-weight: 700; }
+.stmt-empty { padding: 18px; color: #94a3b8; }
+.stmt-footer-note {
+  margin-top: 16px;
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+/* Return totals */
+
+.ret-footer-wrap {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.ret-total-card {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 14px 24px;
+  text-align: center;
+  background-color: #ffffff;
+  min-width: 170px;
+}
+
+.ret-total-card.highlight { border-color: #d97706; background-color: #fffbeb; }
+
+.ret-total-caption {
+  font-size: 12px;
+  color: #64748b;
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.ret-total-num { font-size: 20px; font-weight: 800; color: #0f172a; }
+
+.ret-note {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #92400e;
+  background-color: #fffbeb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+/* A4 sheet + the print-only switch */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  .accounts-container > *:not(.print-container),
+  .returns-container > *:not(.print-container) {
+    display: none !important;
+  }
+
+  .accounts-container .print-container,
+  .returns-container .print-container {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffffff !important;
+    z-index: 99999;
+  }
+
+  .statement-paper {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 12mm !important;
+    box-sizing: border-box !important;
+  }
+
+  .return-paper {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 15mm 18mm !important;
+    box-sizing: border-box !important;
+  }
+}

@@ -23,7 +23,8 @@ const customerSchema = new mongoose.Schema(
         mobileNumber: {
             type: String,
             required: [true, 'Mobile number is required'],
-            trim: true
+            trim: true,
+            maxlength: [11, 'Phone number is too long']
         },
 
         address: {

@@ -10,24 +10,9 @@ import {
   RouterModule
 } from '@angular/router';
 
-import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
 import { Language } from '../../services/language';
 import { TranslatePipe } from '../../pipes/translate-pipe';
-
-interface SignupResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      phone?: string;
-      role: string;
-    };
-    token: string;
-  };
-}
 
 @Component({
   selector: 'app-signup',
@@ -56,7 +41,7 @@ export class Signup {
   isLoading = false;
 
   constructor(
-    private api: ApiService,
+    private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     public language: Language
@@ -141,39 +126,33 @@ export class Signup {
     this.cdr.detectChanges();
 
     // =========================
-    // Send to Backend
+    // Send to Backend — starts email verification (no token yet)
     // =========================
 
-    this.api.post<SignupResponse>(
-      '/auth/signup',
-      {
-        name: this.username.trim(),
-        email: this.email.trim(),
-        password: this.password,
-        phone: this.mobile.trim()
-      }
-    ).subscribe({
+    this.authService.signup({
+      name: this.username.trim(),
+      email: this.email.trim(),
+      password: this.password,
+      phone: this.mobile.trim()
+    }).subscribe({
 
       // =========================
-      // Signup Success
+      // Signup Success -> go verify the emailed OTP
       // =========================
 
       next: (response) => {
 
         this.isLoading = false;
 
-        this.successMessage =
-          response.message ||
-          this.language.translate(
-            'signup_success'
-          );
+        // Stash the pending challenge (never a session) and continue.
+        this.authService.setPendingChallenge({
+          ...response.data,
+          rememberMe: false
+        });
 
         this.cdr.detectChanges();
 
-        // Go to login after successful registration
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 1000);
+        this.router.navigate(['/verify-otp']);
       },
 
       // =========================
@@ -181,11 +160,6 @@ export class Signup {
       // =========================
 
       error: (error) => {
-
-        console.log(
-          'SIGNUP ERROR:',
-          error
-        );
 
         this.isLoading = false;
 
@@ -199,6 +173,16 @@ export class Signup {
           this.errorMessage =
             error.error?.message ||
             'signup_error_invalid_data';
+
+        } else if (error.status === 502) {
+
+          this.errorMessage =
+            'signup_error_email_send';
+
+        } else if (error.status === 429) {
+
+          this.errorMessage =
+            'signup_error_too_many';
 
         } else if (error.status === 0) {
 

@@ -50,6 +50,29 @@
 
 
   <!-- ========================= -->
+  <!-- Factory setup required -->
+  <!-- ========================= -->
+
+  <div
+    class="setup-banner print-hide"
+    *ngIf="isFactoryLoaded && !factoryConfigured"
+  >
+
+    <span>
+      {{ 'fac_not_configured_banner' | translate }}
+    </span>
+
+    <a
+      class="setup-link"
+      routerLink="/factory-settings"
+    >
+      {{ 'nav_factory_settings' | translate }}
+    </a>
+
+  </div>
+
+
+  <!-- ========================= -->
   <!-- Error -->
   <!-- ========================= -->
 
@@ -924,17 +947,75 @@
 
         <div class="inv-header-right">
 
+          <!--
+            Factory branding comes from the saved factory profile.
+            The software vendor (Factory Hub) is deliberately NOT printed here:
+            this is the actual factory's identity. The factory logo is centred
+            in the middle of this header band (see .inv-header-center).
+          -->
+
           <h1 class="brand-title">
-            FactoryHub
+
+            {{
+              factoryProfile?.factoryName
+                ? factoryProfile?.factoryName
+                : ('fac_not_configured' | translate)
+            }}
+
           </h1>
 
-          <p class="brand-sub">
-            مصنع الأصالة للملابس والنسيج
+          <!-- Manager block: the fixed Arabic label "إدارة" sits directly
+               above the manager's name. "إدارة" is a display label, not a
+               stored field, and appears identically in Arabic and English. -->
+
+          <ng-container *ngIf="factoryProfile?.managerName">
+
+            <p class="brand-manager-label">
+              {{ 'inv_admin_label' | translate }}
+            </p>
+
+            <p class="brand-manager">
+              {{ factoryProfile?.managerName }}
+            </p>
+
+          </ng-container>
+
+          <!-- Contact phone (prominent) -->
+
+          <p
+            class="brand-phone"
+            *ngIf="factoryProfile?.phone"
+          >
+            {{ 'fac_phone' | translate }}: {{ factoryProfile?.phone }}
           </p>
 
-          <p class="brand-sub">
-            القاهرة - المنطقة الصناعية
+          <!-- Address (secondary) -->
+
+          <p
+            class="brand-sub"
+            *ngIf="factoryProfile?.address"
+          >
+            {{ factoryProfile?.address }}
           </p>
+
+        </div>
+
+        <!--
+          Factory logo: centred in the empty space between the factory block
+          and the invoice-meta block (the visual centre of the header band).
+          Rendered only when a logo is configured; otherwise the space stays empty.
+        -->
+
+        <div
+          class="inv-header-center"
+          *ngIf="getFactoryLogoUrl()"
+        >
+
+          <img
+            class="inv-header-logo"
+            [src]="getFactoryLogoUrl()"
+            [alt]="'fac_logo' | translate"
+          />
 
         </div>
 

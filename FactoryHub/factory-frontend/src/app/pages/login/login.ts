@@ -76,20 +76,16 @@ export class Login {
     }).subscribe({
 
       // =========================
-      // Login Success
+      // Credentials valid: an OTP challenge was created.
+      // No token yet — go verify the emailed code.
       // =========================
       next: (response) => {
 
         this.isLoading = false;
 
-        this.authService.saveSession(
-          response,
-          this.rememberMe
-        );
+        this.goToVerification(response.data);
 
         this.cdr.detectChanges();
-
-        this.router.navigate(['/dashboard']);
       },
 
       // =========================
@@ -97,17 +93,35 @@ export class Login {
       // =========================
       error: (error) => {
 
-        console.log(
-          'LOGIN ERROR RECEIVED:',
-          error
-        );
-
         this.isLoading = false;
+
+        // Unverified account: the backend still issued a REGISTRATION
+        // challenge (500-series safety aside) so route to verification.
+        if (
+          error.status === 403 &&
+          error.error?.data?.challengeId
+        ) {
+          this.goToVerification(error.error.data);
+          this.cdr.detectChanges();
+          return;
+        }
 
         if (error.status === 401) {
 
           this.errorMessage =
             'login_error_invalid_credentials';
+
+        }
+        else if (error.status === 502) {
+
+          this.errorMessage =
+            'login_error_email_send';
+
+        }
+        else if (error.status === 429) {
+
+          this.errorMessage =
+            'login_error_too_many';
 
         }
         else if (error.status === 0) {
@@ -140,6 +154,18 @@ export class Login {
       }
 
     });
+  }
+
+  // Store the pending challenge and move to the OTP screen. Never marks the
+  // user as authenticated here.
+  private goToVerification(challenge: any): void {
+
+    this.authService.setPendingChallenge({
+      ...challenge,
+      rememberMe: this.rememberMe
+    });
+
+    this.router.navigate(['/verify-otp']);
   }
 
   onEmailBlur(): void {

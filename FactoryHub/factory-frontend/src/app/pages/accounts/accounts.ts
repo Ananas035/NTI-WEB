@@ -6,7 +6,7 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { TranslatePipe } from '../../pipes/translate-pipe';
 import { Language } from '../../services/language';
@@ -16,10 +16,12 @@ import {
   Invoice,
   ReturnItem,
   Check,
-  AccountTransaction
+  AccountTransaction,
+  FactoryProfile
 } from '../../interfaces/interface';
 
 import { ApiService } from '../../services/api';
+import { FactoryProfileService } from '../../services/factory-profile';
 
 
 // ============================================================
@@ -194,6 +196,70 @@ interface StatementSummary {
 
 
 // ============================================================
+// Account Statement Export (backend report)
+// ============================================================
+
+interface StatementItem {
+  modelCode: number;
+  modelName: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+interface StatementTransaction {
+  date: string;
+  type: 'INVOICE' | 'RETURN' | 'PAYMENT';
+  referenceNumber: string;
+  paymentMethod: string | null;
+  notes: string;
+  quantity: number;
+  items: StatementItem[];
+  debit: number;
+  credit: number;
+  amount: number;
+  balance: number;
+}
+
+interface StatementPeriod {
+  key: string;
+  months: number;
+  from: string;
+  to: string;
+  fromDate: string;
+  toDate: string;
+}
+
+interface StatementExport {
+  generatedAt: string;
+  period: StatementPeriod;
+  customer: {
+    customerId: number;
+    name: string;
+    showroomName?: string;
+    mobileNumber?: string;
+    address?: string;
+  };
+  openingBalance: number;
+  totals: {
+    sales: number;
+    returns: number;
+    payments: number;
+  };
+  closingBalance: number;
+  currentBalance: number;
+  reconciled: boolean;
+  transactions: StatementTransaction[];
+}
+
+interface StatementResponse {
+  success: boolean;
+  statement: StatementExport;
+  message?: string;
+}
+
+
+// ============================================================
 // Component
 // ============================================================
 
@@ -214,7 +280,9 @@ export class Accounts implements OnInit {
   private api: ApiService,
   private cdr: ChangeDetectorRef,
   private route: ActivatedRoute,
-  private language: Language
+  private router: Router,
+  private language: Language,
+  private factoryProfileService: FactoryProfileService
 ) {}
 
 private translateKey(key: string): string {
@@ -328,6 +396,30 @@ private translateKey(key: string): string {
 
 
   // ============================================================
+  // Statement PDF Export
+  // (separate, backend-calculated report — independent of the on-screen
+  //  statement modal above)
+  // ============================================================
+
+  factoryProfile: FactoryProfile | null = null;
+
+  showStatementPeriodModal = false;
+
+  statementPeriodCustomer:
+    AccountCustomer | null = null;
+
+  statementPeriod:
+    '1m' | '3m' | '6m' = '1m';
+
+  isExportingStatement = false;
+
+  statementPeriodError = '';
+
+  printableStatement:
+    StatementExport | null = null;
+
+
+  // ============================================================
   // Payment Modal
   // ============================================================
 
@@ -408,9 +500,50 @@ closeCheckDateWarning(): void {
           : null;
 
 
+      // Dashboard Quick Action "Add New Customer": open the creation form
+      // immediately (it does not depend on the customer list being loaded).
+      if (params.get('new') === '1') {
+
+        // Defer one microtask so the modal opens (and the temporary flag is
+        // dropped) after the current navigation/change-detection pass.
+        Promise.resolve().then(() => {
+
+          this.openAddCustomer();
+
+          this.cdr.detectChanges();
+
+          this.consumeNewParam();
+        });
+      }
+
+
       this.loadAccounts();
     });
+
+  // Branding for the exported statement (logo, factory name, manager, phone).
+  this.loadFactoryProfile();
 }
+
+
+  // ============================================================
+  // Consume The `new` Navigation Flag
+  // ============================================================
+
+  // Removes the temporary `new` query param (keeping any other params) so a
+  // refresh or a later plain visit no longer opens the creation form.
+  private consumeNewParam(): void {
+
+    this.router.navigate([], {
+
+      relativeTo: this.route,
+
+      queryParams: { new: null },
+
+      queryParamsHandling: 'merge',
+
+      replaceUrl: true
+    });
+  }
 
 
   // ============================================================
@@ -2412,6 +2545,240 @@ toggleChecksView(): void {
 
   this.statementTransactions = [];
 }
+
+
+  // ============================================================
+  // Statement PDF Export
+  // ============================================================
+
+  // Branding (logo / factory name / manager / phone) for the printed document.
+  private loadFactoryProfile(): void {
+
+    this.factoryProfileService
+      .loadProfile()
+      .subscribe({
+
+        next: () => {
+
+          this.factoryProfile =
+            this.factoryProfileService.profile;
+
+          this.cdr.detectChanges();
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Factory Profile Load Error:',
+            error
+          );
+        }
+      });
+  }
+
+  getFactoryLogoUrl(): string {
+
+    return this.factoryProfileService
+      .resolveLogoUrl(
+        this.factoryProfile?.logoUrl
+      );
+  }
+
+  // Opens the period picker for a single customer.
+  openStatementPeriodModal(
+    customer: AccountCustomer
+  ): void {
+
+    this.statementPeriodCustomer =
+      customer;
+
+    this.statementPeriod = '1m';
+
+    this.statementPeriodError = '';
+
+    this.isExportingStatement = false;
+
+    this.showStatementPeriodModal = true;
+
+    this.cdr.detectChanges();
+  }
+
+  closeStatementPeriodModal(): void {
+
+    this.showStatementPeriodModal = false;
+
+    this.statementPeriodCustomer = null;
+
+    this.statementPeriodError = '';
+
+    this.isExportingStatement = false;
+  }
+
+  selectStatementPeriod(
+    period: '1m' | '3m' | '6m'
+  ): void {
+
+    this.statementPeriod = period;
+
+    this.statementPeriodError = '';
+  }
+
+  // Fetch the authoritative statement from the backend, then print it. The
+  // backend is the source of truth for every figure (opening balance, totals,
+  // running balance); the frontend only renders.
+  generateStatementPdf(): void {
+
+    const customer =
+      this.statementPeriodCustomer;
+
+    if (!customer || this.isExportingStatement) {
+      return;
+    }
+
+    this.isExportingStatement = true;
+
+    this.statementPeriodError = '';
+
+    this.api
+      .get<StatementResponse>(
+        `/accounts/customer/${customer.id}/statement` +
+        `?period=${this.statementPeriod}`
+      )
+      .subscribe({
+
+        next: (response) => {
+
+          this.isExportingStatement = false;
+
+          if (
+            !response ||
+            !response.success ||
+            !response.statement
+          ) {
+
+            this.statementPeriodError =
+              'acc_statement_error';
+
+            this.cdr.detectChanges();
+
+            return;
+          }
+
+          this.showStatementPeriodModal = false;
+
+          this.printStatement(
+            response.statement
+          );
+        },
+
+        error: (error) => {
+
+          this.isExportingStatement = false;
+
+          console.error(
+            'Statement Export Error:',
+            error
+          );
+
+          this.statementPeriodError =
+            'acc_statement_error';
+
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  // Renders the hidden print document and opens the browser print dialog
+  // (the same mechanism the invoices page uses, so Arabic/RTL render correctly).
+  private printStatement(
+    statement: StatementExport
+  ): void {
+
+    this.printableStatement = statement;
+
+    const originalTitle =
+      document.title;
+
+    document.title =
+      `Customer_Account_Statement_` +
+      `${this.sanitizeFilename(statement.customer.name)}_` +
+      `${statement.period.toDate}`;
+
+    window.onafterprint = () => {
+
+      document.title = originalTitle;
+
+      this.printableStatement = null;
+
+      window.onafterprint = null;
+
+      this.cdr.detectChanges();
+    };
+
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  }
+
+  // Keep the download filename / document title free of characters that break
+  // downloads on any OS.
+  private sanitizeFilename(value: string): string {
+
+    return (
+      (value || 'Customer')
+        .replace(/[\\/:*?"<>|]+/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+      || 'Customer'
+    );
+  }
+
+  // Localized label for a statement row type.
+  statementTypeLabel(
+    type: string
+  ): string {
+
+    if (type === 'INVOICE') {
+      return this.translateKey('acc_type_invoice');
+    }
+
+    if (type === 'RETURN') {
+      return this.translateKey('acc_type_return');
+    }
+
+    if (type === 'PAYMENT') {
+      return this.translateKey('acc_type_payment');
+    }
+
+    return type;
+  }
+
+  // yyyy-mm-dd -> dd/mm/yyyy for the printed statement (local time).
+  formatStatementDate(
+    value: string
+  ): string {
+
+    if (!value) {
+      return '—';
+    }
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) {
+      return value;
+    }
+
+    const day =
+      String(date.getDate()).padStart(2, '0');
+
+    const month =
+      String(date.getMonth() + 1).padStart(2, '0');
+
+    return `${day}/${month}/${date.getFullYear()}`;
+  }
 
 
   // ============================================================

@@ -22,6 +22,7 @@ export class Sidebar {
     { id: 'invoices', path: '/invoices', labelKey: 'nav_invoices', icon: 'M3 2h14v16H3z M7 7h6M7 10h6M7 13h4' },
     { id: 'returns', path: '/returns', labelKey: 'nav_returns', icon: 'M4 7h9a4 4 0 0 1 0 8H7 M7 4 L4 7 L7 10' },
     { id: 'inventory', path: '/inventory', labelKey: 'nav_inventory', icon: 'M2 18V9L10 3l8 6v9H2Z M7 12h6v6H7z' },
+    { id: 'factory-settings', path: '/factory-settings', labelKey: 'nav_factory_settings', icon: 'M3 3h14v14H3z M6 7h8 M6 10h8 M6 13h5' },
   ];
 
   onLogout() {

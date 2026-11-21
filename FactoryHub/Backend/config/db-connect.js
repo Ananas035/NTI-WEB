@@ -15,8 +15,10 @@ const dbConnect = async () => {
             family: 4
             });
         console.log(`Database connection success`);
+        return true;
     } catch (error) {
     console.log(`Database connection fail: ${error.message}`);
+        return false;
     }
 
     

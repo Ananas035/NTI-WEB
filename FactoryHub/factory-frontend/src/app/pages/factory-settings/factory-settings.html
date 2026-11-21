@@ -1,0 +1,305 @@
+<div class="factory-settings-container">
+
+  <!-- ========================= -->
+  <!-- Header -->
+  <!-- ========================= -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h1 class="title">
+        {{ 'fac_title' | translate }}
+      </h1>
+
+      <p class="subtitle">
+        {{ 'fac_subtitle' | translate }}
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Loading -->
+  <!-- ========================= -->
+
+  <div
+    class="loading-state"
+    *ngIf="isLoading"
+  >
+    {{ 'fac_loading' | translate }}
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Messages -->
+  <!-- ========================= -->
+
+  <div
+    class="alert-success"
+    *ngIf="successMessage && !isLoading"
+  >
+    {{ successMessage | translate }}
+  </div>
+
+  <div
+    class="alert-error"
+    *ngIf="errorMessage && !isLoading"
+  >
+    {{ errorMessage | translate }}
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Permission Notice -->
+  <!-- ========================= -->
+
+  <div
+    class="permission-notice"
+    *ngIf="!isLoading && !isAdmin"
+  >
+    {{ 'fac_permission_note' | translate }}
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- Form -->
+  <!-- ========================= -->
+
+  <form
+    class="settings-card"
+    *ngIf="!isLoading"
+    (ngSubmit)="saveChanges()"
+  >
+
+    <!-- Logo -->
+
+    <div class="section">
+
+      <h2 class="section-title">
+        {{ 'fac_logo' | translate }}
+      </h2>
+
+      <div class="logo-uploader">
+
+        <div class="logo-preview-box">
+
+          <img
+            *ngIf="hasLogo"
+            [src]="logoDisplayUrl"
+            class="logo-preview-img"
+            [alt]="'fac_logo' | translate"
+          />
+
+          <div
+            *ngIf="!hasLogo"
+            class="logo-placeholder"
+          >
+            {{ 'fac_no_logo' | translate }}
+          </div>
+
+        </div>
+
+        <div class="logo-actions">
+
+          <label
+            class="upload-dropzone"
+            [class.disabled]="!isAdmin"
+          >
+
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              (change)="onFileSelected($event)"
+              [disabled]="!isAdmin"
+            />
+
+            <span>
+              {{ (hasLogo ? 'fac_replace_logo' : 'fac_upload_logo') | translate }}
+            </span>
+
+          </label>
+
+          <button
+            *ngIf="logoPreview"
+            type="button"
+            class="btn-secondary"
+            (click)="clearSelectedLogo()"
+          >
+            {{ 'fac_remove_logo' | translate }}
+          </button>
+
+          <p class="hint">
+            {{ 'fac_logo_hint' | translate }}
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Details -->
+
+    <div class="section">
+
+      <h2 class="section-title">
+        {{ 'fac_details' | translate }}
+      </h2>
+
+      <div class="form-grid">
+
+        <!-- Factory name -->
+
+        <div class="form-group">
+
+          <label class="form-label" for="fac-factory-name">
+            {{ 'fac_factory_name' | translate }}
+            <span class="req">*</span>
+          </label>
+
+          <input
+            id="fac-factory-name"
+            type="text"
+            class="form-control"
+            [class.invalid]="fieldErrors['factoryName']"
+            name="factoryName"
+            [(ngModel)]="factoryName"
+            [disabled]="!isAdmin"
+          />
+
+          <span
+            class="field-error"
+            *ngIf="fieldErrors['factoryName']"
+          >
+            {{ 'fac_error_required' | translate }}
+          </span>
+
+        </div>
+
+        <!-- Manager name -->
+
+        <div class="form-group">
+
+          <label class="form-label" for="fac-manager-name">
+            {{ 'fac_manager_name' | translate }}
+            <span class="req">*</span>
+          </label>
+
+          <input
+            id="fac-manager-name"
+            type="text"
+            class="form-control"
+            [class.invalid]="fieldErrors['managerName']"
+            name="managerName"
+            [(ngModel)]="managerName"
+            [disabled]="!isAdmin"
+          />
+
+        </div>
+
+        <!-- Phone -->
+
+        <div class="form-group">
+
+          <label class="form-label" for="fac-phone">
+            {{ 'fac_phone' | translate }}
+            <span class="req">*</span>
+          </label>
+
+          <input
+            id="fac-phone"
+            type="text"
+            class="form-control"
+            [class.invalid]="fieldErrors['phone']"
+            name="phone"
+            [(ngModel)]="phone"
+            [disabled]="!isAdmin"
+          />
+
+          <span
+            class="field-error"
+            *ngIf="fieldErrors['phone']"
+          >
+            {{ 'fac_error_required' | translate }}
+          </span>
+
+        </div>
+
+        <!-- Address -->
+
+        <div class="form-group">
+
+          <label class="form-label" for="fac-address">
+            {{ 'fac_address' | translate }}
+          </label>
+
+          <input
+            id="fac-address"
+            type="text"
+            class="form-control"
+            name="address"
+            [(ngModel)]="address"
+            [disabled]="!isAdmin"
+          />
+
+        </div>
+
+        <!-- Email -->
+
+        <div class="form-group">
+
+          <label class="form-label" for="fac-email">
+            {{ 'fac_email' | translate }}
+          </label>
+
+          <input
+            id="fac-email"
+            type="email"
+            class="form-control"
+            [class.invalid]="fieldErrors['email']"
+            name="email"
+            [(ngModel)]="email"
+            [disabled]="!isAdmin"
+          />
+
+          <span
+            class="field-error"
+            *ngIf="fieldErrors['email']"
+          >
+            {{ 'fac_error_invalid_email' | translate }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Actions -->
+
+    <div class="form-actions">
+
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="!isAdmin || isSaving"
+      >
+
+        {{
+          isSaving
+            ? ('fac_saving' | translate)
+            : ('fac_save_changes' | translate)
+        }}
+
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

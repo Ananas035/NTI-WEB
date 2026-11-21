@@ -812,3 +812,50 @@
   }
 
 }
+
+
+/* =============================================================
+   Account statement (PDF export)
+   ============================================================= */
+
+.period-hint {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+}
+
+.period-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.period-option {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.period-option:hover {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.period-option.active {
+  border-color: #2563eb;
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.btn-icon.export:hover {
+  background-color: #ecfdf5;
+  color: #059669;
+}

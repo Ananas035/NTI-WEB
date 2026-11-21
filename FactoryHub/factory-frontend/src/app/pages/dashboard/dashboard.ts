@@ -1245,4 +1245,17 @@ navigate(path: string): void {
   this.router.navigate([path]);
 }
 
+// ============================
+// Quick Actions — open create form
+// ============================
+
+// Navigates to a management page and asks it (via the `new` query param) to
+// open its creation form immediately. The destination consumes the flag and
+// clears it, so normal navigation/refreshes keep showing the plain list view.
+navigateCreate(path: string): void {
+  this.router.navigate([path], {
+    queryParams: { new: '1' }
+  });
+}
+
 }

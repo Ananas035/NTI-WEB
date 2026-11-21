@@ -23,6 +23,42 @@ export class Language {
       'nav_invoices': 'الفواتير',
       'nav_returns': 'المرتجعات',
       'nav_inventory': 'المخزون',
+      'nav_factory_settings': 'بيانات المصنع',
+
+      // ============================================================
+      // Factory Profile / Branding
+      // ============================================================
+      'fac_title': 'بيانات المصنع والهوية',
+      'fac_subtitle': 'قم بتعيين هوية المصنع التي تظهر على الفواتير والمستندات الرسمية',
+      'fac_loading': 'جاري تحميل بيانات المصنع...',
+      'fac_logo': 'شعار المصنع',
+      'fac_no_logo': 'لا يوجد شعار بعد',
+      'fac_upload_logo': 'رفع الشعار',
+      'fac_replace_logo': 'تغيير الشعار',
+      'fac_remove_logo': 'إزالة الشعار المحدد',
+      'fac_logo_hint': 'الصيغ المدعومة: PNG أو JPEG أو WebP. الحد الأقصى 3 ميجابايت.',
+      'fac_details': 'بيانات المصنع',
+      'fac_factory_name': 'اسم المصنع',
+      'fac_manager_name': 'اسم المدير / المسؤول',
+      'fac_phone': 'رقم الهاتف',
+      'fac_address': 'العنوان',
+      'fac_email': 'البريد الإلكتروني',
+      'fac_save_changes': 'حفظ التغييرات',
+      'fac_saving': 'جاري الحفظ...',
+      'fac_success_saved': 'تم حفظ بيانات المصنع بنجاح',
+      'fac_permission_note': 'عرض فقط: لا تمتلك صلاحية تعديل بيانات المصنع.',
+      'fac_not_configured': 'لم يتم إعداد بيانات المصنع',
+      'fac_not_configured_banner': 'لم يتم إعداد بيانات المصنع بعد. يجب إعدادها لتظهر بشكل صحيح على الفواتير.',
+      'fac_error_load': 'تعذر تحميل بيانات المصنع',
+      'fac_error_save': 'تعذر حفظ بيانات المصنع',
+      'fac_error_logo': 'تم حفظ البيانات لكن تعذر رفع الشعار',
+      'fac_error_required': 'هذا الحقل مطلوب',
+      'fac_error_invalid_email': 'صيغة البريد الإلكتروني غير صحيحة',
+      'fac_error_invalid_format': 'صيغة الصورة غير مدعومة. المسموح: PNG أو JPEG أو WebP',
+      'fac_error_file_too_large': 'حجم الصورة كبير جداً. الحد الأقصى 3 ميجابايت',
+      'fac_error_permission': 'غير مصرح لك بتعديل بيانات المصنع',
+      'fac_error_unauthorized': 'يجب تسجيل الدخول أولاً',
+      'fac_error_validation': 'البيانات المدخلة غير صالحة',
       // Header / Profile
       'header_toggle_sidebar': 'طي / فتح القائمة الجانبية',
       'profile_email': 'البريد الإلكتروني',
@@ -133,6 +169,10 @@ export class Language {
       'inv_egp': 'ج.م',
 
       'inv_print_sale': 'فاتورة بيع',
+
+      // Fixed display label printed directly above the manager's name on the
+      // invoice. It is intentionally identical in Arabic and English.
+      'inv_admin_label': 'إدارة',
       'inv_invoice_no': 'رقم الفاتورة:',
       'inv_print_date': 'التاريخ:',
       'inv_bill_to': 'فاتورة موجهة إلى السيد /',
@@ -204,6 +244,41 @@ export class Language {
       'acc_egp': 'ج.م',
 
       'acc_statement': 'كشف الحساب',
+
+      // Account statement (PDF export)
+      'acc_export_statement': 'استخراج كشف حساب PDF',
+      'acc_statement_period_title': 'فترة كشف الحساب',
+      'acc_statement_period_hint': 'اختر الفترة المطلوبة لاستخراج الكشف',
+      'acc_period_1m': 'آخر شهر',
+      'acc_period_3m': 'آخر 3 شهور',
+      'acc_period_6m': 'آخر 6 شهور',
+      'acc_statement_generate': 'استخراج PDF',
+      'acc_statement_generating': 'جارٍ استخراج الكشف...',
+      'acc_statement_error': 'تعذر استخراج كشف الحساب، حاول مرة أخرى',
+      'acc_statement_doc_title': 'كشف حساب عميل',
+      'acc_statement_period_label': 'الفترة',
+      'acc_statement_generated_at': 'تاريخ الإصدار',
+      'acc_statement_customer': 'العميل',
+      'acc_statement_customer_id': 'رقم العميل',
+      'acc_statement_opening_balance': 'الرصيد الافتتاحي',
+      'acc_statement_closing_balance': 'الرصيد الختامي',
+      'acc_statement_sales_total': 'إجمالي الفواتير',
+      'acc_statement_returns_total': 'إجمالي المرتجعات',
+      'acc_statement_payments_total': 'إجمالي المدفوعات',
+      'acc_statement_to': 'إلى',
+      'acc_th_date': 'التاريخ',
+      'acc_th_document': 'المستند',
+      'acc_th_type': 'النوع',
+      'acc_th_description': 'البيان',
+      'acc_th_quantity': 'العدد',
+      'acc_th_debit': 'مدين',
+      'acc_th_credit': 'دائن',
+      'acc_th_balance': 'الرصيد',
+      'acc_type_invoice': 'فاتورة بيع',
+      'acc_type_return': 'مرتجع',
+      'acc_type_payment': 'دفعة',
+      'acc_statement_footer_note': 'كشف حساب صادر إلكترونياً من نظام إدارة المصنع',
+
       'acc_edit': 'تعديل بيانات العميل',
       'acc_delete': 'حذف',
 
@@ -619,6 +694,27 @@ export class Language {
           'ret_piece': 'قطعة',
           'ret_egp': 'ج.م',
 
+          // Return document (PDF)
+          'ret_download_pdf': 'تحميل فاتورة المرتجع PDF',
+          'ret_save_print': 'حفظ وطباعة',
+          'ret_print_title': 'فاتورة مرتجع',
+          'ret_print_number': 'رقم المرتجع',
+          'ret_print_date': 'تاريخ المرتجع',
+          'ret_print_customer': 'العميل',
+          'ret_print_store': 'المعرض',
+          'ret_print_phone': 'الهاتف',
+          'ret_print_model_code': 'كود الموديل',
+          'ret_print_model_name': 'الموديل',
+          'ret_print_quantity': 'العدد',
+          'ret_print_unit_price': 'سعر الوحدة',
+          'ret_print_total': 'الإجمالي',
+          'ret_print_total_pieces': 'إجمالي القطع',
+          'ret_print_total_value': 'إجمالي قيمة المرتجع',
+          'ret_print_note':
+            'هذا المستند يوثّق بضاعة مرتجعة وليس بيعاً جديداً',
+          'ret_print_error': 'تعذر تحميل بيانات المرتجع',
+          'ret_print_loading': 'جارٍ تحضير فاتورة المرتجع...',
+
           // Fallbacks
           'ret_customer_name_fallback': 'بدون اسم',
           'ret_model_fallback': 'موديل',
@@ -762,7 +858,13 @@ export class Language {
 'login_error_generic':
   'حدث خطأ أثناء تسجيل الدخول',
 
-  'signup_brand_subtitle': 'نظام إدارة المصنع',
+'login_error_email_send':
+  'تعذر إرسال رمز التحقق، حاول مرة أخرى',
+
+'login_error_too_many':
+  'محاولات كثيرة، حاول لاحقاً',
+
+'signup_brand_subtitle': 'نظام إدارة المصنع',
 
 'signup_title': 'إنشاء حساب مستخدم جديد',
 
@@ -832,6 +934,155 @@ export class Language {
 
 'signup_error_generic':
   'حدث خطأ أثناء إنشاء الحساب',
+
+'signup_error_email_send':
+  'تعذر إرسال رمز التحقق، حاول مرة أخرى',
+
+'signup_error_too_many':
+  'محاولات تسجيل كثيرة، حاول لاحقاً',
+
+// OTP verification screen
+'otp_title': 'تأكيد البريد الإلكتروني',
+
+'otp_purpose_registration':
+  'أدخل الرمز لإكمال إنشاء حسابك',
+
+'otp_purpose_login':
+  'أدخل الرمز لإكمال تسجيل الدخول',
+
+'otp_sent_to': 'تم إرسال رمز مكوَّن من 6 أرقام إلى',
+
+'otp_code_label': 'رمز التحقق',
+
+'otp_expires_in': 'ينتهي الرمز خلال',
+
+'otp_seconds': 'ثانية',
+
+'otp_verify': 'تأكيد',
+
+'otp_verifying': 'جاري التحقق...',
+
+'otp_resend': 'إعادة إرسال الرمز',
+
+'otp_resending': 'جاري الإرسال...',
+
+'otp_resend_wait': 'يمكنك إعادة الإرسال بعد',
+
+'otp_back_to_login': 'العودة لتسجيل الدخول',
+
+'otp_resend_success': 'تم إرسال رمز جديد إلى بريدك الإلكتروني',
+
+'otp_error_incomplete': 'يرجى إدخال الرمز المكوَّن من 6 أرقام',
+
+'otp_error_invalid': 'رمز التحقق غير صحيح',
+
+'otp_error_forbidden': 'هذا الحساب غير مُفعَّل',
+
+'otp_error_too_many':
+  'تجاوزت عدد المحاولات المسموح، اطلب رمزاً جديداً',
+
+'otp_error_resend_cooldown':
+  'يرجى الانتظار قبل طلب رمز جديد',
+
+'otp_error_connection': 'تعذر الاتصال بالسيرفر',
+
+'otp_error_server': 'حدث خطأ في السيرفر',
+
+'otp_error_generic': 'حدث خطأ أثناء التحقق',
+
+// Forgot password (Arabic)
+'forgot_title': 'استعادة كلمة المرور',
+
+'forgot_subtitle':
+  'أدخل اسم المستخدم أو البريد الإلكتروني ورقم الهاتف المرتبط بحسابك.',
+
+'forgot_identifier': 'اسم المستخدم أو البريد الإلكتروني',
+
+'forgot_identifier_placeholder': 'اسم المستخدم أو البريد الإلكتروني',
+
+'forgot_phone': 'رقم الهاتف',
+
+'forgot_phone_placeholder': 'رقم الهاتف المرتبط بالحساب',
+
+'forgot_submit': 'إرسال رمز التحقق',
+
+'forgot_loading': 'جاري الإرسال...',
+
+'forgot_back_to_login': 'العودة لتسجيل الدخول',
+
+'forgot_error_required': 'يرجى إدخال اسم المستخدم أو البريد الإلكتروني ورقم الهاتف',
+
+'forgot_error_identifier_required': 'هذا الحقل مطلوب',
+
+'forgot_error_phone_required': 'رقم الهاتف مطلوب',
+
+'forgot_error_invalid_phone': 'يرجى إدخال رقم هاتف صحيح',
+
+'forgot_error_too_many': 'تجاوزت عدد المحاولات المسموح. حاول لاحقاً',
+
+'forgot_error_email_send':
+  'تعذر إرسال البريد الإلكتروني. حاول مرة أخرى بعد قليل',
+
+'forgot_error_connection': 'تعذر الاتصال بالسيرفر',
+
+'forgot_error_server': 'حدث خطأ في السيرفر',
+
+'forgot_error_generic': 'حدث خطأ، يرجى المحاولة مرة أخرى',
+
+// Reset OTP (Arabic)
+'reset_otp_title': 'تأكيد رمز إعادة التعيين',
+
+'reset_otp_subtitle':
+  'أدخل الرمز المكوَّن من 6 أرقام الذي تم إرساله إلى البريد الإلكتروني المسجَّل. تنتهي صلاحية الرمز خلال 5 دقائق.',
+
+'reset_otp_verify': 'تأكيد الرمز',
+
+'reset_otp_resend': 'إعادة إرسال الرمز',
+
+'reset_otp_back': 'العودة لإدخال بيانات الحساب',
+
+// Reset password (Arabic)
+'reset_pw_title': 'تعيين كلمة مرور جديدة',
+
+'reset_pw_subtitle':
+  'اختر كلمة مرور جديدة لحسابك. بعد الحفظ ستعود لتسجيل الدخول.',
+
+'reset_pw_new': 'كلمة المرور الجديدة',
+
+'reset_pw_new_placeholder': 'كلمة المرور الجديدة',
+
+'reset_pw_confirm': 'تأكيد كلمة المرور الجديدة',
+
+'reset_pw_confirm_placeholder': 'أعد إدخال كلمة المرور الجديدة',
+
+'reset_pw_submit': 'حفظ كلمة المرور',
+
+'reset_pw_loading': 'جاري الحفظ...',
+
+'reset_pw_return_login': 'العودة لتسجيل الدخول',
+
+'reset_pw_success_title': 'تم إعادة تعيين كلمة المرور',
+
+'reset_pw_success_message':
+  'تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول باستخدام كلمة المرور الجديدة.',
+
+'reset_pw_error_required': 'هذا الحقل مطلوب',
+
+'reset_pw_error_policy': 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
+
+'reset_pw_error_mismatch': 'كلمتا المرور غير متطابقتين',
+
+'reset_pw_error_too_many': 'تجاوزت عدد المحاولات المسموح. حاول لاحقاً',
+
+'reset_pw_error_invalid':
+  'انتهت صلاحية تفويض إعادة التعيين أو أنه غير صالح. يرجى إعادة المحاولة',
+
+'reset_pw_error_connection': 'تعذر الاتصال بالسيرفر',
+
+'reset_pw_error_server': 'حدث خطأ في السيرفر',
+
+'reset_pw_error_generic': 'تعذر إعادة تعيين كلمة المرور، حاول مرة أخرى',
+
     },
     en: {
       // Header & Navigation
@@ -845,6 +1096,42 @@ export class Language {
       'nav_invoices': 'Invoices',
       'nav_returns': 'Returns',
       'nav_inventory': 'Inventory',
+      'nav_factory_settings': 'Factory Settings',
+
+      // ============================================================
+      // Factory Profile / Branding
+      // ============================================================
+      'fac_title': 'Factory Identity & Settings',
+      'fac_subtitle': 'Configure the factory identity shown on invoices and official documents',
+      'fac_loading': 'Loading factory settings...',
+      'fac_logo': 'Factory Logo',
+      'fac_no_logo': 'No logo yet',
+      'fac_upload_logo': 'Upload Logo',
+      'fac_replace_logo': 'Replace Logo',
+      'fac_remove_logo': 'Remove selected logo',
+      'fac_logo_hint': 'Supported formats: PNG, JPEG or WebP. Maximum size 3MB.',
+      'fac_details': 'Factory Details',
+      'fac_factory_name': 'Factory Name',
+      'fac_manager_name': 'Manager / Representative Name',
+      'fac_phone': 'Contact Phone',
+      'fac_address': 'Address',
+      'fac_email': 'Email',
+      'fac_save_changes': 'Save Changes',
+      'fac_saving': 'Saving...',
+      'fac_success_saved': 'Factory profile saved successfully',
+      'fac_permission_note': 'View only: you do not have permission to edit the factory profile.',
+      'fac_not_configured': 'Factory profile not configured',
+      'fac_not_configured_banner': 'The factory profile has not been set up yet. Configure it so invoices show the correct identity.',
+      'fac_error_load': 'Could not load the factory profile',
+      'fac_error_save': 'Could not save the factory profile',
+      'fac_error_logo': 'Details saved, but the logo upload failed',
+      'fac_error_required': 'This field is required',
+      'fac_error_invalid_email': 'Invalid email address',
+      'fac_error_invalid_format': 'Unsupported image format. Allowed: PNG, JPEG or WebP',
+      'fac_error_file_too_large': 'The image is too large. Maximum size is 3MB',
+      'fac_error_permission': 'You are not authorized to edit the factory profile',
+      'fac_error_unauthorized': 'Please sign in first',
+      'fac_error_validation': 'The submitted data is invalid',
       // Header / Profile
       'header_toggle_sidebar': 'Collapse / Open Sidebar',
       'profile_email': 'Email',
@@ -954,6 +1241,10 @@ export class Language {
       'inv_egp': 'EGP',
 
       'inv_print_sale': 'Sales Invoice',
+
+      // Fixed display label printed directly above the manager's name on the
+      // invoice. It is intentionally identical in Arabic and English.
+      'inv_admin_label': 'إدارة',
       'inv_invoice_no': 'Invoice Number:',
       'inv_print_date': 'Date:',
       'inv_bill_to': 'Invoice issued to Mr./Ms.',
@@ -1025,6 +1316,41 @@ export class Language {
       'acc_egp': 'EGP',
 
       'acc_statement': 'Statement',
+
+      // Account statement (PDF export)
+      'acc_export_statement': 'Export Account Statement (PDF)',
+      'acc_statement_period_title': 'Statement Period',
+      'acc_statement_period_hint': 'Choose the period for the statement',
+      'acc_period_1m': 'Last month',
+      'acc_period_3m': 'Last 3 months',
+      'acc_period_6m': 'Last 6 months',
+      'acc_statement_generate': 'Generate PDF',
+      'acc_statement_generating': 'Generating statement...',
+      'acc_statement_error': 'Could not generate the account statement. Please try again',
+      'acc_statement_doc_title': 'Customer Account Statement',
+      'acc_statement_period_label': 'Period',
+      'acc_statement_generated_at': 'Generated on',
+      'acc_statement_customer': 'Customer',
+      'acc_statement_customer_id': 'Customer ID',
+      'acc_statement_opening_balance': 'Opening balance',
+      'acc_statement_closing_balance': 'Closing balance',
+      'acc_statement_sales_total': 'Total sales',
+      'acc_statement_returns_total': 'Total returns',
+      'acc_statement_payments_total': 'Total payments',
+      'acc_statement_to': 'to',
+      'acc_th_date': 'Date',
+      'acc_th_document': 'Document',
+      'acc_th_type': 'Type',
+      'acc_th_description': 'Description',
+      'acc_th_quantity': 'Qty',
+      'acc_th_debit': 'Debit',
+      'acc_th_credit': 'Credit',
+      'acc_th_balance': 'Balance',
+      'acc_type_invoice': 'Sales Invoice',
+      'acc_type_return': 'Return',
+      'acc_type_payment': 'Payment',
+      'acc_statement_footer_note': 'Statement generated electronically by the factory management system',
+
       'acc_edit': 'Edit Customer',
       'acc_delete': 'Delete',
 
@@ -1441,6 +1767,27 @@ export class Language {
       'ret_piece': 'pieces',
       'ret_egp': 'EGP',
 
+      // Return document (PDF)
+      'ret_download_pdf': 'Download Return PDF (PDF)',
+      'ret_save_print': 'Save & Print',
+      'ret_print_title': 'Return Invoice',
+      'ret_print_number': 'Return No.',
+      'ret_print_date': 'Return date',
+      'ret_print_customer': 'Customer',
+      'ret_print_store': 'Showroom',
+      'ret_print_phone': 'Phone',
+      'ret_print_model_code': 'Model Code',
+      'ret_print_model_name': 'Model',
+      'ret_print_quantity': 'Qty',
+      'ret_print_unit_price': 'Unit Price',
+      'ret_print_total': 'Total',
+      'ret_print_total_pieces': 'Total pieces',
+      'ret_print_total_value': 'Total return value',
+      'ret_print_note':
+        'This document records returned goods, not a new sale.',
+      'ret_print_error': 'Could not load the return document',
+      'ret_print_loading': 'Preparing the return invoice...',
+
       // Fallbacks
       'ret_customer_name_fallback': 'Unnamed',
       'ret_model_fallback': 'Model',
@@ -1592,6 +1939,12 @@ export class Language {
 'login_error_generic':
   'An error occurred while signing in',
 
+'login_error_email_send':
+  'Could not send the verification code. Please try again.',
+
+'login_error_too_many':
+  'Too many attempts. Please try again later.',
+
   'signup_brand_subtitle': 'Factory Management System',
 
 'signup_title': 'Create a New User Account',
@@ -1662,6 +2015,156 @@ export class Language {
 
 'signup_error_generic':
   'An error occurred while creating the account',
+
+'signup_error_email_send':
+  'Could not send the verification code. Please try again.',
+
+'signup_error_too_many':
+  'Too many registration attempts. Please try again later.',
+
+// OTP verification screen
+'otp_title': 'Verify Your Email',
+
+'otp_purpose_registration':
+  'Enter the code to finish creating your account',
+
+'otp_purpose_login':
+  'Enter the code to finish signing in',
+
+'otp_sent_to': 'A 6-digit code was sent to',
+
+'otp_code_label': 'Verification code',
+
+'otp_expires_in': 'Code expires in',
+
+'otp_seconds': 'seconds',
+
+'otp_verify': 'Verify',
+
+'otp_verifying': 'Verifying...',
+
+'otp_resend': 'Resend code',
+
+'otp_resending': 'Sending...',
+
+'otp_resend_wait': 'You can resend in',
+
+'otp_back_to_login': 'Back to login',
+
+'otp_resend_success': 'A new code was sent to your email',
+
+'otp_error_incomplete': 'Please enter the 6-digit code',
+
+'otp_error_invalid': 'Incorrect verification code',
+
+'otp_error_forbidden': 'This account is not verified',
+
+'otp_error_too_many':
+  'Too many incorrect attempts. Please request a new code.',
+
+'otp_error_resend_cooldown':
+  'Please wait before requesting a new code',
+
+'otp_error_connection': 'Unable to connect to the server',
+
+'otp_error_server': 'A server error occurred',
+
+'otp_error_generic': 'An error occurred during verification',
+
+// Forgot password (English)
+'forgot_title': 'Reset Password',
+
+'forgot_subtitle':
+  'Enter your username or email and the phone number linked to your account.',
+
+'forgot_identifier': 'Username or Email',
+
+'forgot_identifier_placeholder': 'Username or email',
+
+'forgot_phone': 'Phone Number',
+
+'forgot_phone_placeholder': 'Phone number linked to the account',
+
+'forgot_submit': 'Send Verification Code',
+
+'forgot_loading': 'Sending...',
+
+'forgot_back_to_login': 'Back to login',
+
+'forgot_error_required': 'Please enter your username or email and phone number',
+
+'forgot_error_identifier_required': 'This field is required',
+
+'forgot_error_phone_required': 'Phone number is required',
+
+'forgot_error_invalid_phone': 'Please enter a valid phone number',
+
+'forgot_error_too_many': 'Too many attempts. Please try again later',
+
+'forgot_error_email_send':
+  'Could not send the email. Please try again shortly',
+
+'forgot_error_connection': 'Unable to connect to the server',
+
+'forgot_error_server': 'A server error occurred',
+
+'forgot_error_generic': 'Something went wrong. Please try again',
+
+// Reset OTP (English)
+'reset_otp_title': 'Confirm Reset Code',
+
+'reset_otp_subtitle':
+  'Enter the 6-digit code sent to the email address stored on your account. The code expires in 5 minutes.',
+
+'reset_otp_verify': 'Verify Code',
+
+'reset_otp_resend': 'Resend Code',
+
+'reset_otp_back': 'Back to account details',
+
+// Reset password (English)
+'reset_pw_title': 'Set a New Password',
+
+'reset_pw_subtitle':
+  'Choose a new password for your account. You will return to login afterwards.',
+
+'reset_pw_new': 'New Password',
+
+'reset_pw_new_placeholder': 'New password',
+
+'reset_pw_confirm': 'Confirm New Password',
+
+'reset_pw_confirm_placeholder': 'Re-enter the new password',
+
+'reset_pw_submit': 'Save Password',
+
+'reset_pw_loading': 'Saving...',
+
+'reset_pw_return_login': 'Return to Login',
+
+'reset_pw_success_title': 'Password Reset Successful',
+
+'reset_pw_success_message':
+  'Your password has been changed successfully. Please sign in with your new password.',
+
+'reset_pw_error_required': 'This field is required',
+
+'reset_pw_error_policy': 'Password must be at least 6 characters',
+
+'reset_pw_error_mismatch': 'Passwords do not match',
+
+'reset_pw_error_too_many': 'Too many attempts. Please try again later',
+
+'reset_pw_error_invalid':
+  'The reset authorization is invalid or has expired. Please start again',
+
+'reset_pw_error_connection': 'Unable to connect to the server',
+
+'reset_pw_error_server': 'A server error occurred',
+
+'reset_pw_error_generic':
+  'Could not reset the password. Please try again',
+
           }
   };
 

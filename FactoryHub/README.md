@@ -159,4 +159,3 @@ Only the unauthenticated flow endpoints are public: `signup`, `login`, `verify-e
 
 ---
 
-*Built as part of the NTI full-stack web development training.*
